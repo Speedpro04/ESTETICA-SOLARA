@@ -1,0 +1,2 @@
+# Stripe
+stripe==11.0.0

@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  # Redis - Filas e cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Celery Worker
+  celery-worker:
+    build: .
+    command: celery -A app.celery_app worker -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  # Celery Beat (Agendamento de tarefas)
+  celery-beat:
+    build: .
+    command: celery -A app.celery_app beat -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  # FastAPI Backend
+  backend:
+    build: .
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --ssl-keyfile=${SSL_KEYFILE:-}
+      --ssl-certfile=${SSL_CERTFILE:-}
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  # Nginx (Reverse Proxy com SSL)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certs:/etc/nginx/certs
+    depends_on:
+      - backend
+
+volumes:
+  redis_data:

@@ -1,0 +1,388 @@
+/* As fontes entram por <link> no index.html, não por @import.
+   @import em CSS cria uma cascata serial (HTML → CSS → fonte) que atrasa
+   o first paint e derruba o LCP — que é fator de ranqueamento direto. */
+
+/* Solara Estética — ver src/brand/tokens.ts para a paleta canônica,
+   contrastes verificados e a regra de uso do dourado. */
+:root {
+  --primary: #241B29;      /* aubergine profundo */
+  --bg-main: #FDFBFA;      /* off-white quente */
+  --card-bg: #F5EDE7;      /* nude */
+  --card-border: #E8DAD0;
+
+  /* Ações */
+  --btn-success: #A4566B;  /* CTA rosé — 5.0:1 com texto branco */
+  --btn-danger: #B4453C;
+  --btn-warn: #C08A2E;
+  --btn-extra: #7D3F55;    /* plum de marca */
+  --gold: #A9814E;         /* acento: display/ícone/borda, nunca corpo de texto */
+  --gold-light: #E0C9A6;
+
+  --sidebar-bg: #241B29;
+  --sidebar-text: #FDFBFA;
+  --foreground: #241B29;
+  --secondary: #6B5F71;    /* 5.9:1 sobre o fundo */
+
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --radius: 3px;
+  --shadow: 0 8px 24px rgba(36, 27, 41, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-main);
+  color: var(--foreground);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Títulos em serif ótica: é o que separa "premium de estética" de "SaaS de TI".
+   Vale para a hierarquia inteira, então o SEO de H1/H2/H3 herda o tom da marca. */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-subtitle {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--btn-success);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 2px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  width: 100%;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateX(5px);
+}
+
+.nav-item.active {
+  background-color: var(--btn-success);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logout-button {
+  background: rgba(255, 82, 82, 0.1);
+  border: 1px solid var(--btn-danger);
+  padding: 12px;
+  border-radius: 2px;
+  cursor: pointer;
+  color: var(--btn-danger);
+  font-weight: 700;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.logout-button:hover {
+  background-color: var(--btn-danger);
+  color: white;
+}
+
+.main {
+  padding: 40px;
+  background-color: var(--bg-main);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.topbar h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.topbar p {
+  color: var(--secondary);
+  font-size: 1rem;
+}
+
+/* Panels & Cards */
+.panel {
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease;
+}
+
+.panel:hover {
+  transform: translateY(-4px);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.panel-header h2 {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* Flow Cards */
+.flow-card {
+  background: white;
+  border: 1.5px solid var(--card-border);
+  padding: 20px;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.flow-card:hover {
+  border-color: var(--primary);
+  background: var(--card-bg);
+}
+
+.flow-card span {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+/* Buttons Global */
+button.primary {
+  background-color: var(--btn-success);
+  color: var(--primary);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 2px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 14px rgba(51, 217, 178, 0.4);
+}
+
+button.primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(51, 217, 178, 0.6);
+}
+
+button.ghost {
+  background: white;
+  border: 2px solid var(--card-border);
+  color: var(--primary);
+  padding: 12px 24px;
+  border-radius: 2px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button.ghost:hover {
+  background: var(--card-border);
+  color: white;
+}
+
+/* Custom Premium Scrollbar */
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* For Firefox */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+/* ============================================
+   RESPONSIVIDADE — Dashboard / layout principal
+   ============================================ */
+
+/* Tablet: sidebar mais estreita */
+@media (max-width: 1024px) {
+  .app-grid {
+    grid-template-columns: 220px 1fr;
+  }
+  .main {
+    padding: 28px;
+  }
+}
+
+/* Mobile: sidebar vira barra horizontal no topo, conteúdo empilha */
+@media (max-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+  .app-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    overflow-x: auto;
+  }
+  .nav {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    flex: 1 1 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-item {
+    white-space: nowrap;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+  .nav-item:hover {
+    transform: none;
+  }
+  .sidebar-footer {
+    flex-direction: row;
+    align-items: center;
+    border-top: none;
+    padding-top: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .main {
+    padding: 20px 16px;
+  }
+  .topbar {
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .topbar h1 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 480px) {
+  .main {
+    padding: 16px 12px;
+  }
+  .panel {
+    padding: 16px;
+  }
+}
+
+/* Solara Voice - Mic Pulse Animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

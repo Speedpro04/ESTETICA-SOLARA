@@ -1,0 +1,46 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+.env
+backend/.env
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# Pasta de credenciais sensíveis (chaves API / payment links)
+API-OPENAI-STRIPE-CHECKOUT/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Config local do Claude/preview
+.claude/
+
+# Rascunhos e arquivos temporários (não versionar)
+scratch/
+temp/
+temp2/
+temp_backup/
+
+# Material original e credenciais - NUNCA versionar
+_original/
+*.zip
+ESTETICA-SOLARA.txt

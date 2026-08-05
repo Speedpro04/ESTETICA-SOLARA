@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste de Microfone - Solara</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #0f0a2e; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .card { background: rgba(255,255,255,0.05); border-radius: 24px; padding: 48px; max-width: 600px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: rgba(255,255,255,0.5); margin-bottom: 32px; }
+    .status { padding: 16px 24px; border-radius: 12px; margin: 16px 0; font-weight: 600; font-size: 1.1rem; }
+    .success { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .error { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .warn { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+    .info { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
+    button { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; padding: 16px 32px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin: 8px; transition: transform 0.2s; }
+    button:hover { transform: scale(1.05); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #transcript { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; min-height: 60px; margin-top: 16px; font-size: 1.2rem; color: #a5b4fc; text-align: left; border: 1px dashed rgba(255,255,255,0.1); }
+    .step { text-align: left; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .step-num { display: inline-block; width: 28px; height: 28px; background: #6366f1; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 700; font-size: 0.85rem; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎙️ Teste de Microfone Solara</h1>
+    <p class="subtitle">Diagnóstico completo do seu hardware de áudio</p>
+    
+    <div id="results"></div>
+    
+    <button id="btnTest1" onclick="testMicPermission()">Teste 1: Permissão do Microfone</button>
+    <button id="btnTest2" onclick="testSpeechRecognition()" disabled>Teste 2: Reconhecimento de Voz</button>
+    
+    <div id="transcript" style="display:none">
+      <strong>Transcrição em tempo real:</strong><br>
+      <span id="transcriptText">Aguardando fala...</span>
+    </div>
+
+    <div style="margin-top: 32px; text-align: left;">
+      <h3 style="color: #f59e0b;">⚠️ Se o Teste 1 falhar, siga estes passos:</h3>
+      <div class="step"><span class="step-num">1</span> Clique no <strong>cadeado 🔒</strong> na barra de endereço do Chrome (ao lado do URL)</div>
+      <div class="step"><span class="step-num">2</span> Procure <strong>"Microfone"</strong> e mude para <strong>"Permitir"</strong></div>
+      <div class="step"><span class="step-num">3</span> Se não aparecer, vá em <strong>Configurações do Windows → Privacidade → Microfone</strong></div>
+      <div class="step"><span class="step-num">4</span> Certifique-se que "Permitir que apps acessem o microfone" esteja <strong>Ativado</strong></div>
+      <div class="step"><span class="step-num">5</span> Certifique-se que o <strong>Google Chrome</strong> esteja na lista de apps permitidos</div>
+    </div>
+  </div>
+
+  <script>
+    const results = document.getElementById('results');
+    
+    function addResult(text, type) {
+      const div = document.createElement('div');
+      div.className = 'status ' + type;
+      div.innerHTML = text;
+      results.appendChild(div);
+    }
+
+    async function testMicPermission() {
+      document.getElementById('btnTest1').disabled = true;
+      addResult('🔍 Verificando microfone...', 'info');
+      
+      try {
+        // Check if any audio input devices exist
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(d => d.kind === 'audioinput');
+        
+        if (audioInputs.length === 0) {
+          addResult('❌ NENHUM MICROFONE DETECTADO no seu computador! O Windows não está reconhecendo nenhum dispositivo de áudio de entrada.', 'error');
+          return;
+        }
+        
+        addResult('✅ ' + audioInputs.length + ' microfone(s) encontrado(s): ' + audioInputs.map(d => d.label || 'Sem nome').join(', '), 'success');
+        
+        // Try to get actual access
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        addResult('✅ PERMISSÃO CONCEDIDA! O Chrome consegue acessar o microfone.', 'success');
+        
+        // Test if audio is actually coming through
+        const audioContext = new AudioContext();
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        source.connect(analyser);
+        analyser.fftSize = 256;
+        const data = new Uint8Array(analyser.frequencyBinCount);
+        
+        addResult('🎤 Fale algo agora... Medindo volume do microfone por 3 segundos...', 'warn');
+        
+        let maxVolume = 0;
+        const checkVolume = setInterval(() => {
+          analyser.getByteFrequencyData(data);
+          const avg = data.reduce((a, b) => a + b, 0) / data.length;
+          if (avg > maxVolume) maxVolume = avg;
+        }, 100);
+        
+        setTimeout(() => {
+          clearInterval(checkVolume);
+          stream.getTracks().forEach(t => t.stop());
+          audioContext.close();
+          
+          if (maxVolume > 5) {
+            addResult('✅ ÁUDIO DETECTADO! Volume máximo: ' + Math.round(maxVolume) + '/255. Seu microfone está funcionando!', 'success');
+            document.getElementById('btnTest2').disabled = false;
+          } else {
+            addResult('❌ NENHUM ÁUDIO DETECTADO. Volume: ' + Math.round(maxVolume) + '/255. O microfone pode estar MUTADO, muito longe, ou com defeito.', 'error');
+            addResult('💡 DICA: Verifique se o microfone do seu LG All-in-One não está silenciado. Alguns modelos têm um botão físico de mudo.', 'warn');
+          }
+        }, 3000);
+        
+      } catch (err) {
+        if (err.name === 'NotAllowedError') {
+          addResult('🚫 PERMISSÃO NEGADA! O Chrome bloqueou o acesso ao microfone. Siga os passos abaixo para liberar.', 'error');
+        } else if (err.name === 'NotFoundError') {
+          addResult('❌ MICROFONE NÃO ENCONTRADO! Nenhum dispositivo de entrada de áudio disponível.', 'error');
+        } else {
+          addResult('❌ ERRO: ' + err.name + ' - ' + err.message, 'error');
+        }
+      }
+    }
+
+    function testSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        addResult('❌ Seu navegador NÃO suporta Speech Recognition. Use o Google Chrome.', 'error');
+        return;
+      }
+      
+      addResult('🎙️ Iniciando reconhecimento de voz... FALE ALGO!', 'info');
+      document.getElementById('transcript').style.display = 'block';
+      
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'pt-BR';
+      
+      recognition.onresult = (event) => {
+        let text = '';
+        for (let i = 0; i < event.results.length; ++i) {
+          text += event.results[i][0].transcript;
+        }
+        document.getElementById('transcriptText').textContent = text;
+        addResult('✅ VOZ RECONHECIDA: "' + text + '"', 'success');
+      };
+      
+      recognition.onerror = (event) => {
+        addResult('❌ ERRO DE RECONHECIMENTO: ' + event.error, 'error');
+        if (event.error === 'audio-capture') {
+          addResult('💡 O erro "audio-capture" significa que o Chrome NÃO CONSEGUE capturar áudio do seu microfone. Verifique as configurações do Windows.', 'warn');
+        }
+      };
+      
+      recognition.onend = () => {
+        addResult('⏹️ Reconhecimento encerrado.', 'info');
+      };
+      
+      try {
+        recognition.start();
+      } catch (e) {
+        addResult('❌ Falha ao iniciar: ' + e.message, 'error');
+      }
+      
+      // Auto-stop after 10 seconds
+      setTimeout(() => {
+        try { recognition.stop(); } catch(e) {}
+      }, 10000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Força o uso de uma versão moderna do Node.js
+providers = ["node"]
+
+[phases.setup]
+nixPkgs = ["nodejs_22"]
+
+[phases.build]
+cmds = ["npm install", "npm run build"]
+
+# Força o preview na porta 3000 para o Easypanel encontrar o serviço
+[start]
+cmd = "npm run preview -- --host --port 3000"

@@ -1,0 +1,79 @@
+{
+  "system_info": {
+    "name": "Solara IA",
+    "role": "Gestora Virtual de Atendimento da Clínica",
+    "objective": "Realizar triagem inicial, agendamentos, remarcações, cancelamentos, confirmações e esclarecimento de dúvidas com postura humanizada, empática, organizada, persuasiva e orientada à conversão.",
+    "transfer_trigger": "Transferir para humano quando o paciente pedir atendimento humano, relatar emergência, dor intensa, falta de ar, sangramento importante, desmaio, risco clínico relevante ou quando a IA não compreender o contexto após tentativas razoáveis."
+  },
+  "rag_dataset": {
+    "intent_agendamento": [
+      "Quero marcar consulta", "Agendar atendimento", "Tem vaga para hoje?", "Quero passar no médico", 
+      "Preciso de um clínico geral", "Agendar retorno", "Marcar exame", "Consulta primeira vez", 
+      "Quero agendar pro meu filho", "Quero agendar pra mim", "Tem horário com pediatra?", 
+      "Queria marcar um horário", "Pode me agendar?", "Preciso marcar cardiologista", 
+      "Marcar consulta particular", "Agendar pelo convênio", "Quero uma avaliação", 
+      "Tem vaga amanhã de manhã?", "Gostaria de marcar uma consulta", "Agendamento de rotina", 
+      "Marcar preventivo", "Consulta de rotina", "Agendar pra semana que vem", 
+      "Quais dias o doutor atende?", "Tem vaga pra sexta?", "Quero marcar pro período da tarde", 
+      "Agendar primeira consulta", "Marcar pra hoje à tarde", "Como faço para agendar?", 
+      "Preciso de um horário urgente", "Tem psiquiatra?", "Quero marcar dermatologista", 
+      "Agendar pra mim e pra minha esposa", "Tem horário depois das 18h?", "Marcar pra sábado", 
+      "Agendamento Unimed", "Agendamento Bradesco Saúde", "Quero marcar um check-up", 
+      "Agendar exames de sangue", "Tem horário livre hoje?"
+    ],
+    "intent_remarcacao": [
+      "Preciso remarcar", "Mudar o dia da consulta", "Alterar meu horário", "Não vou conseguir ir hoje", 
+      "Quero passar pra amanhã", "Pode mudar pra sexta?", "Preciso adiar", "Como faço pra remarcar?", 
+      "Quero mudar meu agendamento", "Transferir consulta", "Adiar atendimento", "Remarcar retorno", 
+      "Mudar para a parte da tarde", "Remarcar para a próxima semana", "Trocar o dia", 
+      "Pode colocar mais tarde?", "Chegarei atrasado, pode remarcar?", "Quero alterar a data", 
+      "Remarcar minha avaliação", "Reagendar", "Tem como reagendar?", "Pode passar pro mês que vem?", 
+      "Preciso trocar o horário", "Mudar de quarta para quinta", "Remarcar doutor Paulo", 
+      "Alterar a médica", "Mudar horário do exame", "Posso ir amanhã em vez de hoje?", 
+      "Quero empurrar pra frente", "Remarcação de consulta", "Tem como atrasar 30 minutos?", 
+      "Gostaria de mudar minha reserva", "Trocar o turno", "Passar de manhã para tarde", 
+      "Adiar pra amanhã", "Reagendar pelo convênio", "Mudar data do check-up", 
+      "Quero reagendar urgente", "Remarcar pra depois do feriado", "Pode me encaixar em outro horário?"
+    ],
+    "intent_cancelamento": [
+      "Quero cancelar", "Cancelar consulta", "Desmarcar atendimento", "Não poderei comparecer", 
+      "Cancelar horário", "Preciso desmarcar", "Surgiu um imprevisto, quero cancelar", 
+      "Pode cancelar meu horário?", "Como faço para cancelar?", "Quero anular o agendamento", 
+      "Cancelar o retorno", "Desistir da consulta", "Cancelar exame", "Não vou mais", 
+      "Tive um problema e não vou", "Cancelar minha ida", "Desmarcar com o cardiologista", 
+      "Cancelar consulta do meu filho", "Pode excluir meu agendamento?", "Quero desmarcar tudo", 
+      "Cancelar pra hoje", "Desmarcar amanhã", "Não preciso mais ir", "Cancelar doutora Helena", 
+      "Por favor, cancele meu horário", "Estou doente, não vou", "Vou cancelar", 
+      "Cancelar encaixe", "Desmarque para mim", "Preciso cancelar minha reserva"
+    ],
+    "intent_verificacao_horario": [
+      "Que horas é minha consulta?", "Confirma meu horário?", "Meu agendamento está confirmado?", 
+      "Qual é o dia da minha consulta?", "Verificar meu horário", "Que horas o doutor atende?", 
+      "Qual o horário do meu retorno?", "Checar meu agendamento", "A consulta de amanhã tá de pé?", 
+      "Confirmar presença", "Estou confirmado?", "Qual a data do exame?", 
+      "Ver o horário da minha esposa", "Que horas tenho que chegar?", "Preciso chegar com antecedência?", 
+      "O médico está atrasado?", "A clínica está aberta?", "Qual meu lugar na fila?", 
+      "Verificar minha vaga", "A consulta é hoje ou amanhã?", "Confirmação de horário", 
+      "Ver minha marcação", "Meu horário é às 14h?", "Lembrar meu horário", 
+      "Pode me lembrar o dia?", "Gostaria de saber meu horário", "A que horas é pra eu estar aí?", 
+      "Verificar status da consulta", "A médica já chegou?", "Que horas fecha?"
+    ],
+    "intent_informacoes_gerais": [
+      "Onde fica a clínica?", "Qual o endereço?", "Aceita convênio?", "Atende Unimed?", 
+      "Qual o valor da consulta?", "Qual o preço?", "Aceita SulAmérica?", "Tem estacionamento?", 
+      "Qual o telefone?", "Como chego aí?", "Vocês fazem exame de sangue?", "Atende criança?", 
+      "Tem cardiologista?", "Aceita cartão?", "Parcela o pagamento?", "Atende emergência?", 
+      "Dá recibo para reembolso?", "Vocês têm pediatra?", "Faz ultrassom?", 
+      "Qual o horário de funcionamento?", "Abre de sábado?", "Aceita Bradesco?", 
+      "Qual a especialidade do Dr. André?", "Quanto custa o retorno?", "O retorno é pago?", 
+      "Tem acessibilidade?", "Ponto de referência", "Qual bairro?", "Aceita PIX?", "Tem convênio com Amil?"
+    ],
+    "intent_keywords_urgencia_transferencia": [
+      "Urgente", "Emergência", "Dor forte", "Agora", "Hoje", "Imediato", "Passar mal", 
+      "Encaixe", "Prioridade", "Rápido", "Falar com atendente", "Humano", "Recepcionista", 
+      "Grave", "Retorno", "Consulta", "Exame", "Desmarcar", "Reagendar", "Agendar", 
+      "Confirmar", "Endereço", "Preço", "Valor", "Convênio", "Particular", "PIX", 
+      "Cartão", "Dinheiro", "Localização"
+    ]
+  }
+}
