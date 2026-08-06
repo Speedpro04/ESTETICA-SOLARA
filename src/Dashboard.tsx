@@ -722,7 +722,9 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
     { id: 'contacts', label: 'Lista de Clientes', icon: <Users size={20} /> },
     { id: 'emr', label: 'Prontuário', icon: <FileText size={20} /> },
     { id: 'whatsapp', label: 'WhatsApp', icon: <MessageSquare size={20} /> },
-    { id: 'journey', label: 'Pré e Pós Consulta', icon: <Zap size={20} /> },
+    // O raio saiu daqui também: esta tela é a jornada da paciente antes e depois
+    // do procedimento, não automação.
+    { id: 'journey', label: 'Pré e Pós Consulta', icon: <Activity size={20} /> },
     { id: 'specialists', label: 'Especialistas', icon: <Stethoscope size={20} /> },
     { id: 'reports', label: 'Relatórios', icon: <BarChart3 size={20} /> },
     { id: 'settings', label: 'Configurações', icon: <Settings size={20} /> },
@@ -2236,8 +2238,10 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                 position: 'relative'
               }}
             >
-              <Zap size={26} color={colors.accent} />
-              <div style={{ position: 'absolute', top: -2, right: -2, width: 14, height: 14, borderRadius: '50%', background: colors.success, border: '2px solid #fff', boxShadow: `0 0 8px ${colors.success}` }} />
+              {/* "S. IA" no lugar do raio: o raio é ícone genérico de automação
+                  e não diz que ali mora a Solara. */}
+              <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '0.02em', color: colors.accent, lineHeight: 1 }}>S. IA</span>
+              <div style={{ position: 'absolute', top: -2, right: -2, width: 14, height: 14, borderRadius: '50%', background: colors.success, border: '2px solid #fff' }} />
             </motion.button>
           )}
         </AnimatePresence>
@@ -2247,7 +2251,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
               <div style={{ background: colors.primary, padding: '24px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 40, height: 40, background: colors.accent, borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Zap size={24} color={colors.primary} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.02em', color: colors.primary, lineHeight: 1 }}>S. IA</span>
                   </div>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '1.2rem' }}>Solara AI</div>
