@@ -2,7 +2,22 @@
     root * /app/dist
     encode zstd gzip
     file_server
-    try_files {path} /index.html
+
+    # Endereço inexistente devolve 404 de verdade, com a página da marca.
+    # Antes havia um `try_files {path} /index.html`, que entregava a home com
+    # status 200 para qualquer caminho — o "soft 404" que o Google reclama:
+    # /blog, /precos e qualquer link errado viravam cópias da home aos olhos do
+    # indexador. Não há rota de cliente a preservar: as telas do app são estado
+    # interno, não caminho na URL.
+    handle_errors {
+        rewrite * /404.html
+        # `status` explícito: sem ele o file_server responderia 200 servindo a
+        # página de erro — trocaria um soft 404 por outro. {err.status_code}
+        # preserva o código real (404, 403, 500).
+        file_server {
+            status {err.status_code}
+        }
+    }
 
     # Security headers
     header {
@@ -10,6 +25,9 @@
         X-Content-Type-Options "nosniff"
         X-XSS-Protection "1; mode=block"
         Referrer-Policy "strict-origin-when-cross-origin"
+        # Um ano, com subdomínios. Só faz efeito em resposta HTTPS — quem
+        # termina o TLS é o proxy do EasyPanel, e o cabeçalho atravessa.
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
         -Server
     }
 
