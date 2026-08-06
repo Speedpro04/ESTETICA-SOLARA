@@ -44,3 +44,6 @@ temp_backup/
 _original/
 *.zip
 ESTETICA-SOLARA.txt
+
+# Pasta temporaria do vite-react-ssg (gerada a cada build)
+.vite-react-ssg-temp
