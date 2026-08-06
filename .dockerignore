@@ -18,7 +18,11 @@ backend/.env
 # Backend Python: imagem separada.
 backend
 
-# Scripts de geração de imagem (rodam na máquina, não no build).
-scripts
+# Arte original da logo. A versão otimizada já vive em public/.
+LOGO-ESTETICA-7777
+
+# scripts/ NÃO entra aqui: o `npm run build` chama scripts/sitemap.mjs. Os
+# outros scripts da pasta (geração de logo e imagens) só rodam na máquina, mas
+# são poucos KB e não vale separar em duas pastas para economizar isso.
 
 *.log

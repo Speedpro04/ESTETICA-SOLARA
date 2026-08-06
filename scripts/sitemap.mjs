@@ -21,7 +21,12 @@ const FONTES = ['src/LandingPage.tsx', 'index.html', 'src/brand/tokens.ts'];
 function ultimaAlteracao() {
   try {
     const datas = FONTES.map((arquivo) =>
-      execSync(`git log -1 --format=%cs -- ${arquivo}`, { encoding: 'utf8' }).trim()
+      execSync(`git log -1 --format=%cs -- ${arquivo}`, {
+        encoding: 'utf8',
+        // Silencia o "fatal: not a git repository" no log do build dentro do
+        // Docker: a ausência de git é caso previsto, não erro.
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim()
     ).filter(Boolean);
     if (datas.length) return datas.sort().at(-1);
   } catch {
