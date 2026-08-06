@@ -1,0 +1,25 @@
+# CRÍTICO: o .env tem service role do Supabase, chave da OpenAI e senha do
+# Redis. Sem esta linha, o `COPY . .` do Dockerfile assa os segredos dentro da
+# imagem — e quem tiver acesso ao registro lê todos eles. As variáveis vão
+# configuradas no painel do EasyPanel, nunca no arquivo.
+.env
+.env.*
+
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+.pytest_cache
+
+# Documentação e SQL: não fazem parte do que roda.
+*.md
+*.sql
+docker-compose.yml
+nginx.conf
+
+# Servidor legado (main.py da raiz do backend). O container sobe app.main:app.
+main.py
+solara_agent.py
+
+tests

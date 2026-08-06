@@ -1,3 +1,4 @@
+import logging
 import time
 from collections import defaultdict
 from fastapi import APIRouter, HTTPException, Request
@@ -92,17 +93,24 @@ def _load_clinic_context(clinic_id: str | None) -> dict | None:
 
         # Profissionais SEMPRE filtrados pela clínica. Sem fallback global:
         # carregar especialistas de outras clínicas vazaria dados entre tenants.
+        #
+        # A consulta era na tabela `specialists`, que não existe no schema —
+        # especialista é linha em `users` com role 'doctor'. O erro caía no
+        # except e a Solara atendia sem saber quem trabalha na clínica, sem que
+        # nada aparecesse no log.
         try:
             sp_res = (
-                _supabase_admin.table("specialists")
+                _supabase_admin.table("users")
                 .select("name, specialty")
-                .eq("active", True)
                 .eq("clinic_id", clinic_id)
+                .eq("role", "doctor")
+                .eq("active", True)
                 .limit(50)
                 .execute()
             )
             ctx["specialists"] = sp_res.data or []
         except Exception:
+            logging.exception("Falha ao carregar especialistas da clínica %s", clinic_id)
             ctx["specialists"] = []
 
         # Base de conhecimento da clínica (o "poder" da Solara para responder de verdade).
