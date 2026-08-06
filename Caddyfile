@@ -1,6 +1,6 @@
 :{$PORT:80} {
     root * /app/dist
-    encode gzip
+    encode zstd gzip
     file_server
     try_files {path} /index.html
 
@@ -13,9 +13,31 @@
         -Server
     }
 
-    # Cache static assets
-    @static {
-        path *.ico *.css *.js *.gif *.webp *.avif *.jpg *.jpeg *.png *.svg *.woff *.woff2
+    # Ativos com hash no nome (assets/app-D6oEKuly.js) nunca mudam de conteúdo:
+    # cache de um ano é seguro. O index.html fica de fora de propósito — se ele
+    # for cacheado por um ano, um deploy novo não chega para quem já visitou.
+    @imutavel {
+        path /assets/*
+        path *.woff *.woff2
     }
-    header @static Cache-Control "public, max-age=31536000, immutable"
+    header @imutavel Cache-Control "public, max-age=31536000, immutable"
+
+    # Imagens e favicon vivem na raiz e podem ser trocados sem mudar de nome:
+    # uma semana, com revalidação.
+    @midia {
+        path *.webp *.avif *.jpg *.jpeg *.png *.svg *.ico
+    }
+    header @midia Cache-Control "public, max-age=604800, must-revalidate"
+
+    # O HTML precisa ser sempre verificado, senão o deploy demora a aparecer.
+    @html {
+        path / *.html
+    }
+    header @html Cache-Control "public, max-age=0, must-revalidate"
+
+    # robots e sitemap: buscador deve ver a versão nova rápido.
+    @seo {
+        path /robots.txt /sitemap.xml
+    }
+    header @seo Cache-Control "public, max-age=3600"
 }

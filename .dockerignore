@@ -1,4 +1,24 @@
 node_modules
 dist
 .git
-supabase
+.github
+.claude
+
+# Contém SERVICE_ROLE em texto puro. Fora do contexto de build: mesmo não indo
+# para a imagem final, entraria na camada intermediária e no cache.
+_original
+
+# Segredos e configuração local. O build lê .env.production, que é versionado
+# e só tem valor público.
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# Backend Python: imagem separada.
+backend
+
+# Scripts de geração de imagem (rodam na máquina, não no build).
+scripts
+
+*.log

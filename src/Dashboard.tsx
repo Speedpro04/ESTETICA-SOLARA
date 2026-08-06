@@ -112,7 +112,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
       // Buscar médicos da tabela 'users' com role='doctor' ou 'owner'
       const { data: doctors } = await supabase
         .from('users')
-        .select('id, name, email, specialty, crm, active')
+        .select('id, name, email, specialty, crm, active, role')
         .in('role', ['doctor', 'owner'])
         .eq('clinic_id', clinicId);
 
@@ -973,8 +973,14 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                 </button>
               ) : activeTab === 'specialists' ? (
                 <button onClick={() => {
-                  if (specialistsList.length >= clinicLimit) {
-                    console.warn('Limite de especialistas atingido');
+                  // Conta só quem o plano limita: especialista. O dono aparece
+                  // nesta lista (a consulta traz 'doctor' e 'owner'), mas não
+                  // consome vaga — e a trava do banco também não o conta.
+                  const especialistas = specialistsList.filter((s: any) => s.role !== 'owner').length;
+                  if (especialistas >= clinicLimit) {
+                    // Antes isto era um console.warn: o botão não fazia nada e
+                    // a clínica não sabia por quê.
+                    alert(`Seu plano inclui ${clinicLimit} especialistas e todos estão em uso.\n\nPara liberar mais, fale com a Solara.`);
                   } else {
                     setShowSpecialistModal(true);
                   }
