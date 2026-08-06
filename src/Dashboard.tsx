@@ -7,11 +7,9 @@ import {
   BarChart3, X, Check,
   Stethoscope, UserPlus, AlertCircle, Printer,
   MessageSquare, FileText, Zap, UserCog, Send,
-  CheckCircle2, Target, Trash2, Building, CheckCheck, Mic, Briefcase
+  CheckCircle2, Target, Trash2, Building, CheckCheck, Mic
 } from 'lucide-react';
 import { LogoMarca } from './Logo';
-import PartnersPage from './PartnersPage';
-import PartnersAnalytics from './PartnersAnalytics';
 import { supabase } from './lib/supabase';
 import { getAuthHeaders } from './lib/auth';
 import { dashboardColors } from './brand/tokens';
@@ -727,7 +725,6 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
     { id: 'journey', label: 'Pré e Pós Consulta', icon: <Zap size={20} /> },
     { id: 'specialists', label: 'Especialistas', icon: <Stethoscope size={20} /> },
     { id: 'reports', label: 'Relatórios', icon: <BarChart3 size={20} /> },
-    { id: 'partners', label: 'Parceiros Solara', icon: <Briefcase size={20} /> },
     { id: 'settings', label: 'Configurações', icon: <Settings size={20} /> },
   ];
 
@@ -897,18 +894,8 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
               <span style={{ fontSize: '0.7rem', color: colors.primary, background: colors.success, padding: '3px 8px', borderRadius: 3, fontWeight: 800 }}>ON</span>
             </div>
 
-            <div 
-              onClick={() => setActiveTab('partners')}
-              style={{ marginLeft: 16, marginRight: 24, display: 'flex', alignItems: 'center', gap: 12, background: colors.accent, padding: '10px 24px', borderRadius: 3, color: '#fff', cursor: 'pointer', transition: 'transform 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} 
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <Briefcase size={18} />
-              <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '1px' }}>PARCEIROS SOLARA</span>
-            </div>
-
             <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
-              {['reception', 'agenda', 'specialists', 'emr', 'partners'].includes(activeTab) && (
+              {['reception', 'agenda', 'specialists', 'emr'].includes(activeTab) && (
                 <div style={{ position: 'relative', width: 285 }}>
                   <Search size={18} color={colors.textMuted} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
                   <input 
@@ -1828,14 +1815,6 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                   </div>
                 </div>
                 
-                <PartnersAnalytics clinicId={clinicId} />
-              </motion.div>
-            )}
-
-            {/* VIEW: PARCEIROS SOLARA */}
-            {activeTab === 'partners' && (
-              <motion.div key="partners" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <PartnersPage clinicId={clinicId} />
               </motion.div>
             )}
 

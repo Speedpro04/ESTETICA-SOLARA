@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Solara Estética">
+  <!--
+    Favicon: telefone sobre rosé (#A4566B) com borda dourada.
+
+    Sem o balão de conversa: era ele, junto com o rabicho apontando para baixo,
+    que reproduzia a composição registrada do WhatsApp — quadrado + balão +
+    telefone. Só o telefone diz "atendimento" sem imitar marca de terceiro.
+
+    O telefone é branco, não dourado: champagne sobre rosé dá 2,9:1 e a 16px
+    o traço empapa. Branco dá 5:1 e o ícone continua nítido na aba.
+
+    A borda é desenhada por dentro (inset de metade da espessura), senão metade
+    do traço cairia fora do viewBox e sumiria no recorte.
+  -->
+  <rect width="64" height="64" rx="14" fill="#A4566B"/>
+  <rect x="1.75" y="1.75" width="60.5" height="60.5" rx="12.25" fill="none" stroke="#E0C9A6" stroke-width="3.5"/>
+  <g transform="translate(14 14) scale(1.5)" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.94.36 1.86.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.95.34 1.87.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </g>
+</svg>
