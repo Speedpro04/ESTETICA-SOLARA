@@ -14,9 +14,9 @@ app = FastAPI(
 # Em desenvolvimento, libera também o Vite local.
 def _allowed_origins() -> list[str]:
     origins = {
-        "https://solaraconnect.online",
-        "https://www.solaraconnect.online",
-        "https://app.solaraconnect.online",
+        "https://solaraestetica.online",
+        "https://www.solaraestetica.online",
+        "https://app.solaraestetica.online",
     }
     if settings.FRONTEND_URL:
         origins.add(settings.FRONTEND_URL.rstrip("/"))
@@ -25,7 +25,13 @@ def _allowed_origins() -> list[str]:
         if extra:
             origins.add(extra)
     if settings.ENVIRONMENT != "production":
-        origins.update({"http://localhost:5173", "http://127.0.0.1:5173"})
+        # 5173 é o padrão do Vite; 7777 é a porta usada no desenvolvimento local
+        # deste projeto (.claude/launch.json) e 7788 serve o build pré-renderizado.
+        origins.update({
+            "http://localhost:5173", "http://127.0.0.1:5173",
+            "http://localhost:7777", "http://127.0.0.1:7777",
+            "http://localhost:7788", "http://127.0.0.1:7788",
+        })
     return sorted(origins)
 
 app.add_middleware(

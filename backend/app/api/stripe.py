@@ -264,7 +264,7 @@ async def handle_checkout_completed(session: dict):
             supabase_admin.table("email_logs").insert({
                 "clinic_id": clinic_id,
                 "to_email": user_email,
-                "from_email": "axoshub.solara@gmail.com",
+                "from_email": "contato@solaraestetica.online",
                 "subject": f"Assinatura ativada - Plano {plan_name or 'Solara Connect'}",
                 "template": "welcome",
                 "status": "sent",

@@ -502,7 +502,7 @@ async def _try_handle_reminder_confirmation(
             if when
             else "Tudo bem, sua consulta foi cancelada."
         )
-        reply += "\n\nSe quiser, posso te ajudar a remarcar para um dia melhor. É só me dizer. 😊"
+        reply += "\n\nSe quiser, posso te ajudar a remarcar para um dia melhor. É só me dizer."
 
     for index, bubble in enumerate(_split_into_bubbles(reply)):
         if index > 0:

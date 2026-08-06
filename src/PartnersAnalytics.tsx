@@ -114,8 +114,8 @@ export default function PartnersAnalytics({ clinicId: _clinicId }: PartnersAnaly
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-              <BarChart2 size={24} color="#130f40" />
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#130f40', margin: 0 }}>Performance de Parceiros</h3>
+              <BarChart2 size={24} color="#241B29" />
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#241B29', margin: 0 }}>Performance de Parceiros</h3>
             </div>
             <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>Relatório de cliques e engajamento real do Marketplace B2B Solara Connect.</p>
           </div>
@@ -147,7 +147,7 @@ export default function PartnersAnalytics({ clinicId: _clinicId }: PartnersAnaly
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: 8, 
-                background: 'linear-gradient(135deg, #130f40 0%, #2c3e50 100%)', 
+                background: '#241B29', 
                 color: '#fff', 
                 border: 'none', 
                 padding: '12px 24px', 
@@ -179,7 +179,7 @@ export default function PartnersAnalytics({ clinicId: _clinicId }: PartnersAnaly
         <div style={{ overflowX: 'auto' }}>
           {loading ? (
             <div style={{ padding: '64px', textAlign: 'center', color: '#64748b' }}>
-              <RefreshCw size={36} className="animate-spin" style={{ margin: '0 auto 16px auto', animation: 'spin 1s linear infinite', color: '#130f40' }} />
+              <RefreshCw size={36} className="animate-spin" style={{ margin: '0 auto 16px auto', animation: 'spin 1s linear infinite', color: '#241B29' }} />
               <p style={{ fontWeight: 600 }}>Carregando dados reais do Supabase...</p>
             </div>
           ) : (
@@ -190,24 +190,24 @@ export default function PartnersAnalytics({ clinicId: _clinicId }: PartnersAnaly
                   <th style={{ padding: '16px', color: '#64748b', fontWeight: 600, fontSize: '0.9rem' }}>Categoria</th>
                   <th style={{ padding: '16px', color: '#64748b', fontWeight: 600, fontSize: '0.9rem', textAlign: 'center' }}>Cliques WhatsApp</th>
                   <th style={{ padding: '16px', color: '#64748b', fontWeight: 600, fontSize: '0.9rem', textAlign: 'center' }}>Cliques Site</th>
-                  <th style={{ padding: '16px', color: '#130f40', fontWeight: 700, fontSize: '0.9rem', textAlign: 'center' }}>Total Interações</th>
+                  <th style={{ padding: '16px', color: '#241B29', fontWeight: 700, fontSize: '0.9rem', textAlign: 'center' }}>Total Interações</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredData.map((item, index) => (
                   <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9', background: index % 2 === 0 ? '#fff' : '#f8fafc' }}>
-                    <td style={{ padding: '16px', fontWeight: 600, color: '#130f40' }}>{item.name}</td>
+                    <td style={{ padding: '16px', fontWeight: 600, color: '#241B29' }}>{item.name}</td>
                     <td style={{ padding: '16px', color: '#64748b', fontSize: '0.9rem' }}>{item.category}</td>
                     <td style={{ padding: '16px', textAlign: 'center', color: '#25D366', fontWeight: 600 }}>{item.whatsapp}</td>
                     <td style={{ padding: '16px', textAlign: 'center', color: '#3b82f6', fontWeight: 600 }}>{item.website}</td>
-                    <td style={{ padding: '16px', textAlign: 'center', color: '#130f40', fontWeight: 800 }}>{item.total}</td>
+                    <td style={{ padding: '16px', textAlign: 'center', color: '#241B29', fontWeight: 800 }}>{item.total}</td>
                   </tr>
                 ))}
                 {filteredData.length === 0 && (
                   <tr>
                     <td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: '#94a3b8' }}>
-                      <span style={{ fontSize: '2rem', display: 'block', marginBottom: '8px' }}>📈</span>
-                      Nenhum clique registrado no banco de dados ainda. 
+                      <BarChart2 size={28} color="#94a3b8" style={{ display: 'block', margin: '0 auto 8px' }} />
+                      Nenhum clique registrado no banco de dados ainda.
                       <br />Os novos cliques manuais aparecerão aqui instantaneamente.
                     </td>
                   </tr>

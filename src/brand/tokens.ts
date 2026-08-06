@@ -31,12 +31,17 @@ export const colors = {
   rose: '#A4566B', // CTA principal
   roseDark: '#843F53', // hover do CTA
   gold: '#A9814E', // acento premium (ver regra acima)
+  goldDeep: '#8A6636', // dourado legível em texto corrido — 5.0:1 sobre surface
   goldLight: '#E0C9A6', // realce suave, bordas de destaque
 
   // Superfícies
-  surface: '#FDFBFA', // fundo da página
-  sand: '#F5EDE7', // cards e faixas alternadas
-  border: '#E8DAD0', // divisórias
+  surface: '#FFFFFF', // fundo da página — branco puro (era o off-white #FDFBFA)
+  // Faixas e cards. Era #F5EDE7, um bege rosado que puxava para o pastel e
+  // brigava com o rosé do CTA. Hoje é um erva-doce bem lavado: verde suave o
+  // suficiente para descansar a página entre as seções quentes, e frio o
+  // bastante para o dourado e o rosé ganharem destaque por contraste.
+  sand: '#EDF1E8',
+  border: '#DDE3D6', // divisórias no mesmo eixo do erva-doce
   white: '#FFFFFF',
 
   // Semânticas
@@ -61,6 +66,8 @@ export const landingColors = {
   btnSuccess: colors.rose, // o "botão de ação" agora é rosé, não teal
   btnDanger: colors.danger,
   btnWarn: colors.gold,
+  /** Dourado para texto (menu, links): o `gold` puro reprova em corpo de texto. */
+  goldText: colors.goldDeep,
   extra: colors.plum,
 } as const;
 
@@ -76,6 +83,9 @@ export const authColors = {
   inputBg: colors.inkField,
   success: colors.success,
   danger: colors.danger,
+  /** Botão principal das telas escuras. Chapado, sem degradê: é o mesmo rosé
+   *  do CTA da landing, então a ação primária tem a mesma cor no site inteiro. */
+  cta: colors.rose,
 } as const;
 
 export const dashboardColors = {

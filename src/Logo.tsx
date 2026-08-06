@@ -116,4 +116,31 @@ const Logo: React.FC<LogoProps> = ({
   );
 };
 
+/**
+ * Lockup oficial em imagem (SOLARA ESTÉTICA + "Atendimento Automatizado").
+ *
+ * Arquivo único de 400px de largura para todos os usos — header, rodapé, login
+ * e painel. Ver scripts/logo-otimiza.mjs: 12 KB em WebP sem perda, contra
+ * 260 KB do PNG original.
+ *
+ * `width` é a largura de exibição em px; a altura vem da proporção 537x394 do
+ * original recortado. `height` fica declarado no <img> para o navegador
+ * reservar o espaço e não empurrar o layout quando a imagem carrega (CLS).
+ */
+const ASPECTO = 394 / 537;
+
+export const LogoMarca: React.FC<{ width: number; alt?: string; style?: React.CSSProperties }> = ({
+  width,
+  alt = 'Solara Estética — Atendimento Automatizado',
+  style,
+}) => (
+  <img
+    src="/logo-solara-estetica.webp"
+    alt={alt}
+    width={width}
+    height={Math.round(width * ASPECTO)}
+    style={{ width, height: 'auto', display: 'block', ...style }}
+  />
+);
+
 export default Logo;

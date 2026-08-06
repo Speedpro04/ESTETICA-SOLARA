@@ -9,7 +9,7 @@ import {
   MessageSquare, FileText, Zap, UserCog, Send,
   CheckCircle2, Target, Trash2, Building, CheckCheck, Mic, Briefcase
 } from 'lucide-react';
-import Logo from './Logo';
+import { LogoMarca } from './Logo';
 import PartnersPage from './PartnersPage';
 import PartnersAnalytics from './PartnersAnalytics';
 import { supabase } from './lib/supabase';
@@ -780,7 +780,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
       {/* TOPBAR MOBILE (hambúrguer) */}
       {isMobile && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 60, zIndex: 110, background: colors.sidebar, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
-          <Logo size={30} variant="light" />
+          <LogoMarca width={120} />
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Abrir menu" style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', padding: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
             <span style={{ width: 24, height: 2, background: '#fff', display: 'block', transition: 'transform 0.2s', transform: mobileMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
             <span style={{ width: 24, height: 2, background: '#fff', display: 'block', opacity: mobileMenuOpen ? 0 : 1 }} />
@@ -794,7 +794,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
 
       {/* SIDEBAR NAVEGAÇÃO */}
       <div style={{ width: '280px', backgroundColor: colors.sidebar, color: '#fff', padding: isMobile ? '76px 20px 32px' : '32px 20px', display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0, height: '100vh', zIndex: 105, overflowY: 'auto', transform: isMobile && !mobileMenuOpen ? 'translateX(-100%)' : 'translateX(0)', transition: 'transform 0.25s ease' }}>
-        {!isMobile && <div style={{ marginBottom: 40, padding: '0 12px' }}><Logo size={40} variant="light" /></div>}
+        {!isMobile && <div style={{ marginBottom: 40, padding: '0 12px' }}><LogoMarca width={180} /></div>}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {menuItems.map(item => (
             <button key={item.id} onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderRadius: 3, border: 'none', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 600, transition: 'all 0.2s', backgroundColor: activeTab === item.id ? 'rgba(126, 214, 223, 0.15)' : 'transparent', color: activeTab === item.id ? colors.accent : 'rgba(255,255,255,0.6)', textAlign: 'left' }}>
@@ -888,7 +888,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
 
             <div 
               onClick={() => setShowSolara(!showSolara)}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'linear-gradient(135deg, #130f40 0%, #2c3e50 100%)', padding: '10px 24px', borderRadius: 3, color: '#fff', boxShadow: '0 10px 20px rgba(19,15,64,0.15)', cursor: 'pointer', transition: 'transform 0.2s', border: `1px solid rgba(255,255,255,0.1)` }} 
+              style={{ display: 'flex', alignItems: 'center', gap: 12, background: colors.primary, padding: '10px 24px', borderRadius: 3, color: '#fff', cursor: 'pointer', transition: 'transform 0.2s', border: `1px solid rgba(255,255,255,0.1)` }}
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} 
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
@@ -899,7 +899,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
 
             <div 
               onClick={() => setActiveTab('partners')}
-              style={{ marginLeft: 16, marginRight: 24, display: 'flex', alignItems: 'center', gap: 12, background: 'linear-gradient(135deg, #7ed6df 0%, #22a6b3 100%)', padding: '10px 24px', borderRadius: 3, color: '#130f40', boxShadow: '0 10px 20px rgba(126,214,223,0.2)', cursor: 'pointer', transition: 'transform 0.2s' }} 
+              style={{ marginLeft: 16, marginRight: 24, display: 'flex', alignItems: 'center', gap: 12, background: colors.accent, padding: '10px 24px', borderRadius: 3, color: '#fff', cursor: 'pointer', transition: 'transform 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} 
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
@@ -988,7 +988,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
               )}
             </div>
           </div>
-          <div style={{ height: 2, width: '100%', background: `linear-gradient(to right, ${colors.accent}, ${colors.success}, transparent)` }} />
+          <div style={{ height: 2, width: '100%', background: colors.accent, opacity: 0.5 }} />
         </header>
 
         <div style={{ padding: isMobile ? '16px' : '40px' }}>
@@ -1171,8 +1171,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
 
                   {/* Campaigns Sidebar */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                    <div style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, #1e1b4b 100%)`, borderRadius: 3, padding: 32, color: '#fff', boxShadow: `0 20px 40px ${colors.primary}40`, position: 'relative', overflow: 'hidden' }}>
-                      <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, background: colors.accent, filter: 'blur(100px)', opacity: 0.15 }}></div>
+                    <div style={{ background: colors.primary, borderRadius: 3, padding: 32, color: '#fff', position: 'relative', overflow: 'hidden' }}>
                       <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>Campanhas Inteligentes</h3>
                       <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', marginBottom: 24, lineHeight: 1.6 }}>Selecione um modelo de campanha e deixe a IA da Solara cuidar das mensagens.</p>
                       
@@ -1215,9 +1214,9 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
               <motion.div key="agenda" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, height: 'calc(100vh - 250px)' }}>
                 {(() => {
                   const statusMap = [
-                    { id: 'confirmados', label: 'Confirmados', statuses: ['confirmed', 'pending'], color: colors.success, bg: 'linear-gradient(180deg, rgba(51, 217, 178, 0.05) 0%, rgba(255, 255, 255, 0) 100%)', nextStatus: 'in_progress', nextLabel: 'Iniciar' },
-                    { id: 'espera', label: 'Em Atendimento', statuses: ['in_progress'], color: colors.warn, bg: 'linear-gradient(180deg, rgba(255, 218, 121, 0.05) 0%, rgba(255, 255, 255, 0) 100%)', nextStatus: 'completed', nextLabel: 'Finalizar' },
-                    { id: 'finalizados', label: 'Finalizados', statuses: ['completed'], color: colors.textMuted, bg: 'linear-gradient(180deg, rgba(100, 116, 139, 0.05) 0%, rgba(255, 255, 255, 0) 100%)', nextStatus: null, nextLabel: null },
+                    { id: 'confirmados', label: 'Confirmados', statuses: ['confirmed', 'pending'], color: colors.success, bg: 'transparent', nextStatus: 'in_progress', nextLabel: 'Iniciar' },
+                    { id: 'espera', label: 'Em Atendimento', statuses: ['in_progress'], color: colors.warn, bg: 'transparent', nextStatus: 'completed', nextLabel: 'Finalizar' },
+                    { id: 'finalizados', label: 'Finalizados', statuses: ['completed'], color: colors.textMuted, bg: 'transparent', nextStatus: null, nextLabel: null },
                   ];
                   return statusMap.map(col => {
                     const items = appointmentsList.filter(a => col.statuses.includes(a.status));
@@ -1267,7 +1266,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                                   </div>
                                   <div style={{ paddingLeft: 8 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: `linear-gradient(135deg, ${col.color}20, ${col.color}40)`, color: col.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.1rem', border: `2px solid #fff`, boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: `${col.color}26`, color: col.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.1rem', border: `2px solid #fff`, boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
                                         {patientName.charAt(0)}
                                       </div>
                                       <div style={{ fontWeight: 600, color: colors.primary, fontSize: '1.1rem' }}>{patientName}</div>
@@ -1324,11 +1323,10 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                   <button 
                     onClick={() => setShowRecordModal(true)}
                     style={{ 
-                      background: `linear-gradient(135deg, ${colors.primary} 0%, #2c3e50 100%)`, 
-                      color: '#fff', border: 'none', padding: '16px 28px', borderRadius: 3, 
-                      fontWeight: 700, fontSize: '1rem', cursor: 'pointer', 
-                      display: 'flex', alignItems: 'center', gap: 12, 
-                      boxShadow: `0 15px 30px ${colors.primary}40`,
+                      background: colors.primary,
+                      color: '#fff', border: 'none', padding: '16px 28px', borderRadius: 3,
+                      fontWeight: 700, fontSize: '1rem', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: 12,
                       transition: 'all 0.3s'
                     }}
                     onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
@@ -1590,7 +1588,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                          </button>
                          <input 
                            type="text" 
-                           placeholder={(voiceError && voiceTarget === 'whatsapp') ? `❌ ${voiceError}` : (isListening && voiceTarget === 'whatsapp') ? "Ouvindo... Dite a mensagem" : "Mensagem"}
+                           placeholder={(voiceError && voiceTarget === 'whatsapp') ? voiceError : (isListening && voiceTarget === 'whatsapp') ? "Ouvindo... Dite a mensagem" : "Mensagem"}
                            disabled={!activeChat}
                            style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: '1rem', padding: '9px 10px', color: '#3b4a54' }} 
                            value={newMessage}
@@ -1643,7 +1641,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
 
                   {/* Log em Tempo Real */}
                   <div style={{ background: '#130f40', borderRadius: 3, padding: '32px', color: '#fff', boxShadow: '0 20px 40px rgba(19,15,64,0.3)', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: 200, height: 200, background: 'radial-gradient(circle, rgba(126, 214, 223, 0.15) 0%, rgba(0,0,0,0) 70%)', transform: 'translate(50%, -50%)' }} />
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: 200, height: 200, background: 'transparent' }} />
                     <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Zap size={20} color={colors.accent} /> Log do Cérebro Ativo
                     </h3>
@@ -1681,7 +1679,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                     <div key={i} style={{ background: '#fff', borderRadius: 3, padding: '32px', border: '1px solid rgba(0,0,0,0.03)', boxShadow: '0 15px 35px rgba(0,0,0,0.02)', position: 'relative', overflow: 'hidden' }}>
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 6, background: doc.active ? colors.success : colors.textMuted }} />
                       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-                        <div style={{ width: 60, height: 60, borderRadius: 3, background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primary}dd 100%)`, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 700, boxShadow: `0 10px 20px ${colors.primary}30` }}>
+                        <div style={{ width: 60, height: 60, borderRadius: 3, background: colors.primary, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 700, boxShadow: `0 10px 20px ${colors.primary}30` }}>
                           {doc.name.charAt(0)}
                         </div>
                         <div>
@@ -1794,7 +1792,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '200px', padding: '0 20px' }}>
                       {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
                         <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-                          <motion.div initial={{ height: 0 }} animate={{ height: `${h}%` }} transition={{ duration: 1, delay: i * 0.1 }} style={{ width: 40, background: `linear-gradient(180deg, ${colors.accent} 0%, ${colors.success} 100%)`, borderRadius: 3, opacity: 0.8 }} />
+                          <motion.div initial={{ height: 0 }} animate={{ height: `${h}%` }} transition={{ duration: 1, delay: i * 0.1 }} style={{ width: 40, background: colors.accent, borderRadius: 3, opacity: 0.8 }} />
                           <div style={{ fontSize: '0.85rem', fontWeight: 500, color: colors.textMuted }}>{['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][i]}</div>
                         </div>
                       ))}
@@ -1850,7 +1848,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '20px', fontWeight: 600, color: colors.primary, marginBottom: 8 }}>E-mail de Notificações</label>
-                      <input defaultValue="axoshub.solara@gmail.com" style={{ width: '100%', padding: '12px 16px', borderRadius: 3, border: '1px solid #e2e8f0', outline: 'none' }} />
+                      <input defaultValue="contato@solaraestetica.online" style={{ width: '100%', padding: '12px 16px', borderRadius: 3, border: '1px solid #e2e8f0', outline: 'none' }} />
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                       <div>
@@ -1867,7 +1865,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-                  <div style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, #1e1b4b 100%)`, borderRadius: 3, padding: 32, color: '#fff' }}>
+                  <div style={{ background: colors.primary, borderRadius: 3, padding: 32, color: '#fff' }}>
                     <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Zap size={20} color={colors.accent} /> Cérebro IA (Solara)
                     </h3>
@@ -2246,7 +2244,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
               onClick={() => setShowSolara(true)}
               style={{
                 width: 60, height: 60, borderRadius: '50%',
-                background: `linear-gradient(135deg, ${colors.primary} 0%, #2c3e50 100%)`,
+                background: colors.primary,
                 color: '#fff', border: 'none', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: `0 8px 24px ${colors.primary}50`,
@@ -2298,7 +2296,7 @@ const Dashboard = ({ onLogout, clinicId }: DashboardProps) => {
                     if (voiceError) setVoiceError(null);
                   }}
                   onKeyDown={e => e.key === 'Enter' && (handleVoiceSend() as any)}
-                  placeholder={(voiceError && voiceTarget === 'solara') ? `❌ ${voiceError}` : (isListening && voiceTarget === 'solara') ? "Ouvindo... Fale agora" : isSolaraSending ? "Solara está respondendo..." : "Digite sua dúvida ou diga 'Solara'"} 
+                  placeholder={(voiceError && voiceTarget === 'solara') ? voiceError : (isListening && voiceTarget === 'solara') ? "Ouvindo... Fale agora" : isSolaraSending ? "Solara está respondendo..." : "Digite sua dúvida ou diga 'Solara'"} 
                   disabled={isSolaraSending}
                   style={{ flex: 1, padding: '12px 16px', borderRadius: 3, border: (voiceError && voiceTarget === 'solara') ? '2px solid #ef4444' : (isListening && voiceTarget === 'solara') ? `2px solid ${colors.accent}` : '1px solid #e2e8f0', outline: 'none', fontSize: '15px', transition: 'all 0.3s' }} 
                 />

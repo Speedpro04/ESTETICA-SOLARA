@@ -10,24 +10,28 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="theme-color" content="#241B29" />
 
-    <!-- ATENÇÃO: o token do Search Console abaixo pertence a solaraconnect.online.
-         Ao publicar em solaraestetica.com.br ele deixa de valer — é preciso
-         gerar um novo token na propriedade do domínio novo. -->
-    <meta name="google-site-verification" content="-EqRv04SpbY-IBVlEMo5MI17ZEdOegg4jGaO36ZZmyc" />
+    <!-- Search Console. Este token é o do formato de registro DNS TXT
+         (google-site-verification=...). Se a verificação por tag HTML falhar,
+         o token da aba "Tag HTML" do Search Console é outro. -->
+    <meta name="google-site-verification" content="C6JPg8l9O2dzgBey_UJirfR_PwMdjYvNrX3mdoyWFcU" />
 
-    <!-- Title com 58 caracteres: cabe inteiro no resultado do Google sem corte.
+    <!-- Title com 60 caracteres: cabe inteiro no resultado do Google sem corte.
          Traz o termo de cabeça ("software para clínica de estética"), o segundo
          nicho e o diferencial, nessa ordem de peso. -->
-    <link rel="canonical" href="https://solaraestetica.com.br/" />
+    <link rel="canonical" href="https://solaraestetica.online/" />
     <title>Software para Clínica de Estética e Plástica com IA | Solara</title>
-    <meta name="description" content="Sistema de gestão para clínica de estética e cirurgia plástica com recepcionista de IA no WhatsApp: agenda procedimentos, confirma consultas e reduz no-show. Teste 10 dias grátis." />
+    <!-- Description com 158 caracteres: o Google corta perto de 160 no desktop.
+         Termina em prova de baixo atrito ("sem cartão"), que é o que decide o
+         clique quando o resultado concorre com anúncio pago acima dele. -->
+    <meta name="description" content="Software para clínica de estética e cirurgia plástica com recepcionista de IA no WhatsApp: agenda, confirma e reduz no-show. Teste 10 dias grátis, sem cartão." />
 
     <!-- Open Graph (WhatsApp, Facebook, LinkedIn) -->
     <meta property="og:title" content="Software para Clínica de Estética e Plástica com IA | Solara" />
     <meta property="og:description" content="A recepcionista de IA que atende no WhatsApp 24h, agenda procedimentos e reduz faltas na sua clínica de estética. 10 dias grátis, sem cartão." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://solaraestetica.com.br/" />
-    <meta property="og:image" content="https://solaraestetica.com.br/og-solara-estetica.png" />
+    <meta property="og:url" content="https://solaraestetica.online/" />
+    <meta property="og:image" content="https://solaraestetica.online/og-solara-estetica.png" />
+    <meta property="og:image:alt" content="Solara Estética — a recepcionista de IA da sua clínica de estética" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="pt_BR" />
@@ -37,11 +41,12 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Software para Clínica de Estética e Plástica com IA | Solara" />
     <meta name="twitter:description" content="Recepcionista de IA no WhatsApp para clínica de estética e cirurgia plástica. Agenda, confirma e reduz no-show. 10 dias grátis." />
-    <meta name="twitter:image" content="https://solaraestetica.com.br/og-solara-estetica.png" />
+    <meta name="twitter:image" content="https://solaraestetica.online/og-solara-estetica.png" />
 
-    <!-- Favicon: o sol de oito pétalas da marca, mesmo desenho do Logo.tsx.
-         Alternando pétala cheia e vazada ele continua legível a 16px. -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23241B29%22/><g><ellipse cx=%2232%22 cy=%2215%22 rx=%224.6%22 ry=%2212.5%22 fill=%22%23E0C9A6%22/><ellipse cx=%2232%22 cy=%2215%22 rx=%224.6%22 ry=%2212.5%22 transform=%22rotate(90 32 32)%22 fill=%22%23E0C9A6%22/><ellipse cx=%2232%22 cy=%2215%22 rx=%224.6%22 ry=%2212.5%22 transform=%22rotate(180 32 32)%22 fill=%22%23E0C9A6%22/><ellipse cx=%2232%22 cy=%2215%22 rx=%224.6%22 ry=%2212.5%22 transform=%22rotate(270 32 32)%22 fill=%22%23E0C9A6%22/></g><circle cx=%2232%22 cy=%2232%22 r=%227.5%22 fill=%22%23FDFBFA%22/></svg>" />
+    <!-- Favicon: telefone em rosé com borda dourada.
+         Arquivo em /favicon.svg — data URI aqui só dificultava editar. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
     <!-- Fontes da marca: Fraunces (títulos) + Outfit (corpo).
          A versão anterior carregava Inter aqui e Outfit por @import no CSS —
@@ -49,30 +54,93 @@
          que atrasava o LCP. Agora é uma requisição só, com preconnect. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- A imagem do herói é o elemento de LCP. Sem este preload o navegador só
+         descobre a URL depois de baixar e executar o bundle React. -->
+    <link rel="preload" as="image" href="/hero-solara.webp" fetchpriority="high">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Structured Data: Software / Organização (Rich Results) -->
+    <!-- Structured Data. Um grafo só, com @id ligando as entidades: o Google
+         prefere isso a três blocos soltos que repetem a mesma organização.
+         O FAQPage não entra aqui — ele é montado no LandingPage.tsx a partir
+         das mesmas perguntas que a página exibe, para os dois nunca divergirem.
+
+         Nada de aggregateRating: nota agregada sem avaliação real é motivo de
+         ação manual do Google, e a Solara ainda não tem base de avaliações. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Solara Connect",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
-      "description": "CRM em nuvem para clínicas e consultórios com automação de WhatsApp, agendamento online 24/7, prontuário eletrônico e gestão de recepção em Kanban.",
-      "url": "https://solaraconnect.online/",
-      "image": "https://solaraconnect.online/hero_oficial.png",
-      "inLanguage": "pt-BR",
-      "offers": {
-        "@type": "Offer",
-        "price": "197",
-        "priceCurrency": "BRL"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Axos Hub",
-        "url": "https://axoshub.com"
-      }
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://solaraestetica.online/#organizacao",
+          "name": "Solara Estética",
+          "url": "https://solaraestetica.online/",
+          "logo": "https://solaraestetica.online/logo-solara-estetica.png",
+          "image": "https://solaraestetica.online/og-solara-estetica.png",
+          "email": "contato@solaraestetica.online",
+          "taxID": "26.998.571/0001-50",
+          "areaServed": { "@type": "Country", "name": "Brasil" },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "vendas",
+            "email": "contato@solaraestetica.online",
+            "availableLanguage": ["Portuguese"]
+          },
+          "parentOrganization": {
+            "@type": "Organization",
+            "name": "Axos Hub",
+            "url": "https://axoshub.com"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://solaraestetica.online/#site",
+          "url": "https://solaraestetica.online/",
+          "name": "Solara Estética",
+          "inLanguage": "pt-BR",
+          "publisher": { "@id": "https://solaraestetica.online/#organizacao" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://solaraestetica.online/#software",
+          "name": "Solara Estética",
+          "applicationCategory": "BusinessApplication",
+          "applicationSubCategory": "Software de gestão para clínica de estética",
+          "operatingSystem": "Web",
+          "url": "https://solaraestetica.online/",
+          "image": "https://solaraestetica.online/og-solara-estetica.png",
+          "inLanguage": "pt-BR",
+          "description": "Sistema de gestão para clínica de estética avançada e cirurgia plástica, com recepcionista de inteligência artificial que atende no WhatsApp pela API oficial da Meta: agenda procedimentos, confirma consultas e reduz no-show. Inclui agenda, prontuário, ficha de anamnese e relatórios.",
+          "featureList": [
+            "Recepcionista de IA no WhatsApp 24 horas",
+            "API oficial da Meta com o número da própria clínica",
+            "Agendamento e confirmação automática de consultas",
+            "Redução de no-show por lembrete no WhatsApp",
+            "Prontuário eletrônico e ficha de anamnese",
+            "Relatórios de faturamento, no-show e retorno"
+          ],
+          "publisher": { "@id": "https://solaraestetica.online/#organizacao" },
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Plano mensal",
+              "price": "497.00",
+              "priceCurrency": "BRL",
+              "availability": "https://schema.org/InStock",
+              "url": "https://solaraestetica.online/#planos"
+            },
+            {
+              "@type": "Offer",
+              "name": "Plano anual",
+              "price": "397.00",
+              "priceCurrency": "BRL",
+              "availability": "https://schema.org/InStock",
+              "url": "https://solaraestetica.online/#planos",
+              "description": "Valor mensal equivalente no plano anual, cobrado uma vez por ano."
+            }
+          ]
+        }
+      ]
     }
     </script>
   </head>

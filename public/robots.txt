@@ -1,3 +1,12 @@
 User-agent: *
 Allow: /
-Sitemap: https://solaraconnect.online/sitemap.xml
+
+# Telas de aplicativo: não têm conteúdo indexável e só gastariam orçamento de
+# rastreio. O bloqueio é por prefixo porque o app é uma SPA em rota única hoje,
+# mas o Vite/SSG pode gerar essas rotas depois.
+Disallow: /dashboard
+Disallow: /checkout
+Disallow: /login
+Disallow: /cadastro
+
+Sitemap: https://solaraestetica.online/sitemap.xml

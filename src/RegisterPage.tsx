@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Building2, UserPlus, AlertCircle, Phone } from 'lucide-react';
-import Logo from './Logo';
+import { LogoMarca } from './Logo';
 import { registerClinic } from './lib/auth';
 import { authColors } from './brand/tokens';
+import { useViewport } from './lib/useViewport';
 
 interface RegisterPageProps {
   onRegisterSuccess: (clinicId: string, email: string) => void;
@@ -12,7 +13,8 @@ interface RegisterPageProps {
   selectedPlanSlug?: string;
 }
 
-const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onBack, onNavigateToLogin, selectedPlanSlug = 'avancado' }) => {
+const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onBack, onNavigateToLogin, selectedPlanSlug = 'solara-anual' }) => {
+  const { isMobile, isTablet } = useViewport();
   const [showPassword, setShowPassword] = useState(false);
   const [focusState, setFocusState] = useState({ name: false, email: false, pass: false, phone: false });
   const [formData, setFormData] = useState({ clinicName: '', email: '', password: '', phone: '' });
@@ -53,16 +55,16 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onBack, 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: colors.bgRight, fontFamily: "'Outfit', sans-serif", overflow: 'hidden' }}>
       
-      {/* LEFT PANEL */}
-      <div style={{ width: '35%', minWidth: '400px', backgroundColor: colors.bgLeft, padding: '40px 60px', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.02)', boxShadow: '10px 0 30px rgba(0,0,0,0.5)', zIndex: 10 }}>
+      {/* LEFT PANEL — tela cheia até 1024px (ver LoginPage). */}
+      <div style={{ width: isTablet ? '100%' : '35%', minWidth: isTablet ? 0 : '400px', backgroundColor: colors.bgLeft, padding: isMobile ? '24px 20px' : '40px 60px', display: 'flex', flexDirection: 'column', borderRight: isTablet ? 'none' : '1px solid rgba(255,255,255,0.02)', zIndex: 10 }}>
         
         <button onClick={onBack} style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: colors.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9rem', marginBottom: 'auto' }}>
           <ArrowLeft size={16} /> Voltar
         </button>
 
         <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '340px', margin: '0 auto' }}>
-          <div style={{ marginBottom: 24, marginTop: 16, display: 'flex', justifyContent: 'center', transform: 'scale(1.15)' }}>
-            <Logo size={48} variant="light" />
+          <div style={{ marginBottom: 24, marginTop: 16, display: 'flex', justifyContent: 'center' }}>
+            <LogoMarca width={isMobile ? 160 : 200} />
           </div>
           
           <p style={{ textAlign: 'center', fontSize: '0.85rem', color: colors.textMuted, marginBottom: 32, lineHeight: 1.6 }}>
@@ -115,7 +117,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onBack, 
               </div>
             </div>
 
-            <motion.button disabled={isLoading} whileHover={!isLoading ? { scale: 1.02, boxShadow: `0 10px 25px ${colors.cyan}50` } : {}} whileTap={!isLoading ? { scale: 0.98 } : {}} type="submit" style={{ width: '100%', background: isLoading ? colors.inputBg : `linear-gradient(to right, ${colors.cyan}, #00a8ff)`, border: isLoading ? `1px solid ${colors.cyan}` : 'none', padding: '16px', borderRadius: 3, color: isLoading ? colors.cyan : '#ffffff', fontWeight: 700, fontSize: '1.05rem', cursor: isLoading ? 'wait' : 'pointer', marginBottom: 32, boxShadow: isLoading ? 'none' : `0 8px 20px ${colors.cyan}40`, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10 }}>
+            <motion.button disabled={isLoading} whileHover={!isLoading ? { scale: 1.02 } : {}} whileTap={!isLoading ? { scale: 0.98 } : {}} type="submit" style={{ width: '100%', background: isLoading ? colors.inputBg : colors.cta, border: isLoading ? `1px solid ${colors.cyan}` : 'none', padding: '16px', borderRadius: 3, color: isLoading ? colors.cyan : '#ffffff', fontWeight: 700, fontSize: '1.05rem', cursor: isLoading ? 'wait' : 'pointer', marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10 }}>
               {isLoading ? (
                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
                   <Building2 size={20} />
@@ -132,17 +134,18 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onBack, 
         <div style={{ marginTop: 'auto' }}></div>
       </div>
 
-      {/* RIGHT PANEL */}
-      <div style={{ width: '65%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', width: '800px', height: '800px', background: `radial-gradient(circle, ${colors.cyan}15 0%, rgba(0,0,0,0) 60%)`, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 0 }}></div>
-        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} style={{ zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ width: 180, height: 180, background: 'rgba(126, 214, 223, 0.08)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 40, boxShadow: `0 0 60px ${colors.cyan}20, inset 0 0 30px ${colors.cyan}10`, border: `1px solid ${colors.cyan}30`, backdropFilter: 'blur(10px)' }}>
-            <UserPlus size={90} color={colors.cyan} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 15px ${colors.cyan})` }} />
-          </div>
-          <h2 style={{ fontSize: '3rem', color: colors.cyan, marginBottom: 20, fontWeight: 800, letterSpacing: '-0.02em', textShadow: `0 0 30px ${colors.cyan}40` }}>Junte-se à Revolução</h2>
-          <p style={{ textAlign: 'center', color: '#a0a0a0', maxWidth: 450, fontSize: '1.2rem', lineHeight: 1.6, fontWeight: 400 }}>Centenas de clínicas já automatizaram suas recepções com a tecnologia Solara.</p>
-        </motion.div>
-      </div>
+      {/* RIGHT PANEL — decorativo, sai até 1024px. */}
+      {!isTablet && (
+        <div style={{ width: '65%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', padding: '0 40px' }}>
+          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} style={{ zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: 180, height: 180, background: 'rgba(224, 201, 166, 0.06)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 40, border: `1px solid ${colors.cyan}30` }}>
+              <UserPlus size={90} color={colors.cyan} strokeWidth={1.5} />
+            </div>
+            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', color: colors.cyan, marginBottom: 20, fontWeight: 800, letterSpacing: '-0.02em', textAlign: 'center' }}>Comece pelos 10 dias grátis</h2>
+            <p style={{ textAlign: 'center', color: '#a0a0a0', maxWidth: 450, fontSize: '1.2rem', lineHeight: 1.6, fontWeight: 400 }}>Crie a conta da clínica, converse com a sua própria Solara e só depois decida se assina.</p>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

@@ -63,7 +63,7 @@ const CATEGORY_ACCENT: Record<string, string> = {
   'seguros': '#22c55e',
   'financiamentos': '#eab308',
 };
-const accentFor = (id?: string): string => (id && CATEGORY_ACCENT[id]) || '#130f40';
+const accentFor = (id?: string): string => (id && CATEGORY_ACCENT[id]) || '#241B29';
 
 const categoriesList: { id: string; title: string; Icon: LucideIcon }[] = [
   { id: 'equip-odonto', title: 'Equipamentos Odontológicos', Icon: Stethoscope },
@@ -314,7 +314,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
         flexWrap: 'wrap',
         gap: '24px',
         marginBottom: '40px',
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%)',
+        background: 'rgba(255, 255, 255, 0.85)',
         backdropFilter: 'blur(10px)',
         border: '1px solid rgba(226, 232, 240, 0.8)',
         borderRadius: 3,
@@ -323,7 +323,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #130f40 0%, #2c3e50 100%)',
+            background: '#241B29',
             padding: '16px',
             borderRadius: 3,
             boxShadow: '0 10px 25px rgba(19, 15, 64, 0.2)',
@@ -331,15 +331,15 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <Crown size={36} color="#7ed6df" />
+            <Crown size={36} color="#A9814E" />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h2 style={{ fontSize: '2.2rem', fontWeight: 700, margin: 0, color: '#130f40', letterSpacing: '-1px' }}>
+              <h2 style={{ fontSize: '2.2rem', fontWeight: 700, margin: 0, color: '#241B29', letterSpacing: '-1px' }}>
                 Partnership Premium
               </h2>
               <span style={{ 
-                background: 'linear-gradient(90deg, #f97316 0%, #ea580c 100%)', 
+                background: '#A9814E', 
                 color: '#fff', 
                 fontSize: '0.75rem', 
                 fontWeight: 600, 
@@ -392,7 +392,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                 boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#130f40';
+                e.target.style.borderColor = '#241B29';
                 e.target.style.boxShadow = '0 0 0 4px rgba(19, 15, 64, 0.05)';
               }}
               onBlur={(e) => {
@@ -419,7 +419,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                 fontSize: '0.9rem',
                 fontWeight: 500,
                 cursor: 'pointer',
-                background: regionFilter === 'all' ? '#130f40' : 'transparent',
+                background: regionFilter === 'all' ? '#241B29' : 'transparent',
                 color: regionFilter === 'all' ? '#fff' : '#475569',
                 transition: 'all 0.2s'
               }}
@@ -435,7 +435,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                 fontSize: '0.9rem',
                 fontWeight: 500,
                 cursor: 'pointer',
-                background: regionFilter === 'nacional' ? '#130f40' : 'transparent',
+                background: regionFilter === 'nacional' ? '#241B29' : 'transparent',
                 color: regionFilter === 'nacional' ? '#fff' : '#475569',
                 transition: 'all 0.2s',
                 display: 'flex',
@@ -454,7 +454,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                 fontSize: '0.9rem',
                 fontWeight: 500,
                 cursor: 'pointer',
-                background: regionFilter === 'vale' ? '#130f40' : 'transparent',
+                background: regionFilter === 'vale' ? '#241B29' : 'transparent',
                 color: regionFilter === 'vale' ? '#fff' : '#475569',
                 transition: 'all 0.2s',
                 display: 'flex',
@@ -490,7 +490,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                 fontSize: '0.85rem',
                 fontWeight: 500,
                 cursor: 'pointer',
-                background: activeCategoryTab === 'all' ? 'linear-gradient(135deg, #130f40 0%, #2c3e50 100%)' : '#fff',
+                background: activeCategoryTab === 'all' ? '#241B29' : '#fff',
                 color: activeCategoryTab === 'all' ? '#fff' : '#475569',
                 boxShadow: activeCategoryTab === 'all' ? '0 4px 10px rgba(19, 15, 64, 0.15)' : 'none',
                 transition: 'all 0.2s',
@@ -517,7 +517,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                     fontSize: '0.85rem',
                     fontWeight: 500,
                     cursor: 'pointer',
-                    background: activeCategoryTab === cat.id ? 'linear-gradient(135deg, #130f40 0%, #2c3e50 100%)' : '#fff',
+                    background: activeCategoryTab === cat.id ? '#241B29' : '#fff',
                     color: activeCategoryTab === cat.id ? '#fff' : '#475569',
                     boxShadow: activeCategoryTab === cat.id ? '0 4px 10px rgba(19, 15, 64, 0.15)' : 'none',
                     transition: 'all 0.2s',
@@ -547,7 +547,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
       {/* Contador de Resultados */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
         <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem', fontWeight: 500 }}>
-          Mostrando <strong style={{ color: '#130f40' }}>{totalPartnersCount}</strong> parceiros homologados.
+          Mostrando <strong style={{ color: '#241B29' }}>{totalPartnersCount}</strong> parceiros homologados.
         </p>
         {(searchTerm || activeCategoryTab !== 'all' || regionFilter !== 'all') && (
           <button 
@@ -585,7 +585,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                 }}>
                   <category.Icon size={24} color={accentFor(category.id)} />
                 </div>
-                <h3 style={{ fontSize: '1.6rem', fontWeight: 400, color: '#130f40', margin: 0, letterSpacing: '-0.5px' }}>
+                <h3 style={{ fontSize: '1.6rem', fontWeight: 400, color: '#241B29', margin: 0, letterSpacing: '-0.5px' }}>
                   {category.title}
                 </h3>
               </div>
@@ -602,7 +602,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
               </span>
             </div>
             {/* Linha Divisória em Degradê Avançado */}
-            <div style={{ width: '100%', height: '3px', background: 'linear-gradient(90deg, #7ed6df 0%, #130f40 50%, rgba(126,214,223,0.05) 100%)', borderRadius: 3}} />
+            <div style={{ width: '100%', height: '3px', background: '#E8DAD0', borderRadius: 3}} />
           </div>
 
           {/* Grid de Cards (3 colunas proporcionais preenchendo 100% do espaço) */}
@@ -661,7 +661,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                       Anuncie sua empresa de {category.title.toLowerCase()} e alcance clínicas em todo o Brasil.
                     </p>
                     <span style={{
-                      marginTop: '4px', fontSize: '0.85rem', fontWeight: 700, color: '#130f40',
+                      marginTop: '4px', fontSize: '0.85rem', fontWeight: 700, color: '#241B29',
                       display: 'inline-flex', alignItems: 'center', gap: '6px'
                     }}>
                       <Sparkles size={14} color="#f97316" /> Anuncie Aqui
@@ -705,14 +705,14 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                   {/* Faixa de cor no topo do card */}
                   <div style={{
                     position: 'absolute', top: 0, left: 0, right: 0, height: '4px',
-                    background: `linear-gradient(90deg, ${accent} 0%, ${accent}55 100%)`
+                    background: accent
                   }} />
 
                   {/* Topo: monograma + selo HOMOLOGADO */}
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
                     <div style={{
                       width: '54px', height: '54px', borderRadius: 3,
-                      background: `linear-gradient(135deg, ${accent} 0%, #130f40 135%)`,
+                      background: accent,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: '#fff', fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.5px',
                       boxShadow: `0 6px 16px ${accent}40`, flexShrink: 0
@@ -732,7 +732,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                   {/* Nome do fornecedor */}
                   <h4 style={{
                     margin: '0 0 5px', fontSize: '1.35rem', fontWeight: 700,
-                    color: '#130f40', letterSpacing: '-0.5px', lineHeight: 1.15
+                    color: '#241B29', letterSpacing: '-0.5px', lineHeight: 1.15
                   }}>
                     {partner.name}
                   </h4>
@@ -755,7 +755,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
                     onClick={(e) => { e.stopPropagation(); openSite(partner, category.title); }}
                     style={{
                       marginTop: 'auto', width: '100%', height: '42px', border: 'none', borderRadius: 3,
-                      background: `linear-gradient(90deg, ${accent} 0%, #130f40 170%)`,
+                      background: accent,
                       color: '#fff', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                       boxShadow: `0 6px 16px ${accent}33`, transition: 'filter 0.2s'
@@ -782,8 +782,8 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
           border: '1px solid #e2e8f0',
           boxShadow: '0 10px 25px rgba(0,0,0,0.01)'
         }}>
-          <span style={{ fontSize: '3rem' }}>🔍</span>
-          <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#130f40', marginTop: '16px', marginBottom: '8px' }}>
+          <Search size={40} color="#6B5F71" style={{ margin: '0 auto' }} />
+          <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#241B29', marginTop: '16px', marginBottom: '8px' }}>
             Nenhum parceiro homologado encontrado
           </h3>
           <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '460px', margin: '0 auto 24px auto', lineHeight: '1.5' }}>
@@ -797,7 +797,7 @@ export default function PartnersPage({ clinicId }: PartnersPageProps) {
             }}
             style={{
               padding: '10px 24px',
-              background: 'linear-gradient(135deg, #130f40 0%, #2c3e50 100%)',
+              background: '#241B29',
               color: '#fff',
               border: 'none',
               borderRadius: 3,

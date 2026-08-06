@@ -169,18 +169,56 @@ export async function loginUser(data: LoginData): Promise<SessionUser> {
 // =============================================
 // BILLING ACCESS
 // =============================================
-export async function hasActiveSubscription(clinicId: string): Promise<boolean> {
+export interface AccessInfo {
+  /** Libera o painel. */
+  allowed: boolean;
+  /** Verdadeiro enquanto o teste de 10 dias está valendo. */
+  trial: boolean;
+  /** Dias inteiros restantes de teste (0 quando não há teste em curso). */
+  trialDaysLeft: number;
+}
+
+/**
+ * Decide se a clínica entra no painel.
+ *
+ * 'trialing' vale só até `trial_ends_at`. Sem essa checagem o teste de 10 dias
+ * seria vitalício — o banco não expira o registro sozinho.
+ */
+export async function getAccessInfo(clinicId: string): Promise<AccessInfo> {
+  const negado: AccessInfo = { allowed: false, trial: false, trialDaysLeft: 0 };
+
   const { data, error } = await supabase
     .from('subscriptions')
-    .select('status, created_at')
+    .select('status, trial_ends_at, created_at')
     .eq('clinic_id', clinicId)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (error || !data) return false;
+  if (error || !data) return negado;
+
   const status = String(data.status || '').toLowerCase() as SubscriptionStatus;
-  return status === 'active' || status === 'trialing';
+  if (status === 'active') return { allowed: true, trial: false, trialDaysLeft: 0 };
+  if (status !== 'trialing') return negado;
+
+  // Trial sem data de fim é dado inconsistente: trata como expirado em vez de
+  // liberar acesso indefinido.
+  if (!data.trial_ends_at) return negado;
+
+  const fim = new Date(data.trial_ends_at).getTime();
+  const restanteMs = fim - Date.now();
+  if (restanteMs <= 0) return negado;
+
+  return {
+    allowed: true,
+    trial: true,
+    trialDaysLeft: Math.ceil(restanteMs / (1000 * 60 * 60 * 24))
+  };
+}
+
+/** Atalho para os pontos que só precisam do sim/não. */
+export async function hasActiveSubscription(clinicId: string): Promise<boolean> {
+  return (await getAccessInfo(clinicId)).allowed;
 }
 
 /**
@@ -233,7 +271,7 @@ export async function logEmailSent(params: {
   await supabase.from('email_logs').insert({
     clinic_id: params.clinicId,
     to_email: params.toEmail,
-    from_email: 'axoshub.solara@gmail.com',
+    from_email: 'contato@solaraestetica.online',
     subject: params.subject,
     template: params.template,
     status: 'sent',

@@ -5,11 +5,12 @@ import RegisterPage from './RegisterPage';
 // Telas pós-autenticação carregadas sob demanda (reduz o bundle inicial).
 const Dashboard = lazy(() => import('./Dashboard'));
 const CheckoutPage = lazy(() => import('./CheckoutPage'));
-import { logoutUser, getCurrentSession, hasActiveSubscription } from './lib/auth';
+import { logoutUser, getCurrentSession, getAccessInfo } from './lib/auth';
+import { colors } from './brand/tokens';
 import { supabase } from './lib/supabase';
 import './index.css';
 
-type ViewState = 'landing' | 'login' | 'register' | 'checkout' | 'dashboard' | 'loading';
+type ViewState = 'landing' | 'login' | 'register' | 'checkout' | 'dashboard';
 
 interface SelectedPlan {
   name: string;
@@ -22,15 +23,15 @@ function LazyFallback({ label }: { label: string }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      minHeight: '100vh', backgroundColor: '#0a0822', fontFamily: "'Outfit', sans-serif"
+      minHeight: '100vh', backgroundColor: colors.inkDeep, fontFamily: "'Outfit', sans-serif"
     }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{
-          width: 48, height: 48, border: '3px solid rgba(126, 214, 223, 0.2)',
-          borderTop: '3px solid #7ed6df', borderRadius: '50%',
+          width: 48, height: 48, border: '3px solid rgba(224, 201, 166, 0.2)',
+          borderTop: `3px solid ${colors.goldLight}`, borderRadius: '50%',
           animation: 'spin 1s linear infinite', margin: '0 auto 20px'
         }} />
-        <p style={{ color: '#7ed6df', fontWeight: 600, fontSize: '1rem' }}>{label}</p>
+        <p style={{ color: colors.goldLight, fontWeight: 600, fontSize: '1rem' }}>{label}</p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </div>
@@ -38,12 +39,17 @@ function LazyFallback({ label }: { label: string }) {
 }
 
 function App() {
-  const [view, setView] = useState<ViewState>('loading');
-  const [selectedPlan, setSelectedPlan] = useState<SelectedPlan>({ 
-    name: 'Avançado', 
-    price: '597', 
-    slug: 'avancado',
-    priceId: import.meta.env.VITE_STRIPE_PRICE_AVANCADO || ''
+  // Começa na landing, não numa tela de carregamento. Duas razões: é ela que o
+  // SSG grava no HTML (tela de "Carregando..." pré-renderizada não serve para
+  // nada em busca), e visitante anônimo — a maioria absoluta de quem chega pela
+  // busca — não espera checagem de sessão para ver a página.
+  // Quem já tem sessão vê a landing por um instante antes de cair no painel.
+  const [view, setView] = useState<ViewState>('landing');
+  const [selectedPlan, setSelectedPlan] = useState<SelectedPlan>({
+    name: 'Solara Estética — Anual',
+    price: '397',
+    slug: 'solara-anual',
+    priceId: import.meta.env.VITE_STRIPE_PRICE_ANUAL || ''
   });
   const [clinicId, setClinicId] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -70,9 +76,9 @@ function App() {
           if (userProfile?.clinic_id) {
             setClinicId(userProfile.clinic_id);
             setUserEmail(session.user.email || '');
-            const hasBillingAccess = await hasActiveSubscription(userProfile.clinic_id);
-            if (!hasBillingAccess) {
-              setBillingError('Sua assinatura está pendente/inativa. Finalize o pagamento para acessar o dashboard.');
+            const acesso = await getAccessInfo(userProfile.clinic_id);
+            if (!acesso.allowed) {
+              setBillingError('Seu teste de 10 dias terminou. Assine para voltar a usar o painel.');
               setView('landing');
               return;
             }
@@ -126,16 +132,21 @@ function App() {
     setView('register');
   };
 
+  // Cadastro entrega o painel na hora: o teste de 10 dias sem cartão que a
+  // landing vende começa aqui. O register_clinic já criou a assinatura como
+  // 'trialing' com prazo. O checkout continua existindo, para quando a clínica
+  // decidir assinar (ou quando o teste vencer).
   const handleRegisterSuccess = (newClinicId: string, email: string) => {
     setClinicId(newClinicId);
     setUserEmail(email);
-    setView('checkout');
+    setBillingError('');
+    setView('dashboard');
   };
 
   const handleLoginSuccess = async (loggedClinicId: string) => {
-    const hasBillingAccess = await hasActiveSubscription(loggedClinicId);
-    if (!hasBillingAccess) {
-      setBillingError('Sua assinatura está pendente/inativa. Finalize o pagamento para acessar o dashboard.');
+    const acesso = await getAccessInfo(loggedClinicId);
+    if (!acesso.allowed) {
+      setBillingError('Seu teste de 10 dias terminou. Assine para voltar a usar o painel.');
       setView('landing');
       return;
     }
@@ -154,34 +165,6 @@ function App() {
     setUserEmail('');
     setView('landing');
   };
-
-  // Loading screen enquanto verifica sessão
-  if (view === 'loading') {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '100vh', 
-        backgroundColor: '#0a0822',
-        fontFamily: "'Outfit', sans-serif"
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ 
-            width: 48, 
-            height: 48, 
-            border: '3px solid rgba(126, 214, 223, 0.2)', 
-            borderTop: '3px solid #7ed6df', 
-            borderRadius: '50%', 
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 20px'
-          }} />
-          <p style={{ color: '#7ed6df', fontWeight: 600, fontSize: '1rem' }}>Carregando Solara Connect...</p>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="App">
