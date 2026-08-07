@@ -3,7 +3,10 @@ import LandingPage from './LandingPage';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 // Telas pós-autenticação carregadas sob demanda (reduz o bundle inicial).
-const Dashboard = lazy(() => import('./Dashboard'));
+// Painel novo: atendimento (funil, fila de handoff, leads) e briefing. Substitui
+// o Dashboard antigo, que era de clínica médica genérica e falava com tabelas
+// que não existem mais (medical_records, doctor_id, convênio).
+const Operacional = lazy(() => import('./Operacional'));
 const CheckoutPage = lazy(() => import('./CheckoutPage'));
 import { logoutUser, getCurrentSession, getAccessInfo } from './lib/auth';
 import { colors } from './brand/tokens';
@@ -221,7 +224,7 @@ function App() {
       {/* ======= DASHBOARD ======= */}
       {view === 'dashboard' && (
         <Suspense fallback={<LazyFallback label="Carregando seu painel..." />}>
-          <Dashboard onLogout={handleLogout} clinicId={clinicId} />
+          <Operacional onLogout={handleLogout} clinicId={clinicId} />
         </Suspense>
       )}
     </div>

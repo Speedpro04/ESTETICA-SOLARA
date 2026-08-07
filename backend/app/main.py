@@ -1,13 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .celery_app import celery_app
-from .api import stripe, evolution, whatsapp, ai
+from .api import stripe, meta_webhook, ai, jobs
 
 app = FastAPI(
-    title="Axos Hub API",
-    description="API para Gestão de Clínicas Médicas",
-    version="1.0.0"
+    title="Solara Connect API",
+    description="Time de agentes de IA para clínicas de estética e plástica",
+    version="2.0.0"
 )
 
 # Origens confiáveis: domínios oficiais + FRONTEND_URL + extras via CORS_ORIGINS.
@@ -44,36 +43,37 @@ app.add_middleware(
 
 # Incluir rotas
 app.include_router(stripe.router)
-app.include_router(evolution.router)
-app.include_router(whatsapp.router)
+app.include_router(meta_webhook.router)
+app.include_router(jobs.router)
 app.include_router(ai.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Axos Hub API", "status": "online"}
+    return {"message": "Solara Connect API", "status": "online"}
 
 @app.get("/health")
 async def health_check():
-    # Testa o Redis de verdade (em vez de reportar "connected" fixo).
-    redis_status = "disconnected"
+    """Checagem das dependências que, faltando, quebram o atendimento.
+
+    Redis saiu: o follow-up passou a ser fila no banco (vw_pending_followups)
+    lida por agendador externo, então não há mais broker para monitorar.
+    """
+    from .services.supabase_service import supabase_client
+
+    banco = "disconnected"
     try:
-        import redis
-        r = redis.from_url(settings.REDIS_URL, socket_connect_timeout=2)
-        if r.ping():
-            redis_status = "connected"
+        supabase_client.table("plans").select("id").limit(1).execute()
+        banco = "connected"
     except Exception:
-        redis_status = "disconnected"
+        banco = "disconnected"
 
     return {
-        "status": "healthy",
-        "redis": redis_status,
+        "status": "healthy" if banco == "connected" else "degraded",
+        "supabase": banco,
         "openai_model": settings.MODEL_LLM,
-        "evolution_instance": settings.EVOLUTION_INSTANCE,
+        # Sem estes dois, o webhook da Meta recusa tudo em produção.
+        "meta_webhook": bool(settings.META_APP_SECRET and settings.META_VERIFY_TOKEN),
     }
-
-@app.get("/api/clinics")
-async def list_clinics():
-    return {"clinics": []}
 
 if __name__ == "__main__":
     import uvicorn

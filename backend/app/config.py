@@ -33,14 +33,23 @@ class Settings:
     ALGORITHM = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
 
-    # Evolution API
-    EVOLUTION_API_URL = os.getenv("EVOLUTION_API_URL", "http://localhost:8080")
-    EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "")
-    EVOLUTION_INSTANCE = os.getenv("EVOLUTION_INSTANCE", "")
+    # WhatsApp — Meta Cloud API (oficial)
+    # Um App da Meta atende todas as clínicas (modelo Tech Provider): o segredo e
+    # o verify token são globais, e o que distingue a clínica é o phone_number_id
+    # que chega no webhook.
+    META_APP_SECRET = os.getenv("META_APP_SECRET", "")
+    META_VERIFY_TOKEN = os.getenv("META_VERIFY_TOKEN", "")
+    META_GRAPH_VERSION = os.getenv("META_GRAPH_VERSION", "v23.0")
+    META_GRAPH_URL = os.getenv("META_GRAPH_URL", "https://graph.facebook.com")
+    # Token de System User usado para enviar. Por número, o valor real vem do
+    # gerenciador de segredos (wa_phone_numbers.access_token_ref); este é o
+    # padrão para a operação de número único.
+    META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "")
 
-    # Celery
-    CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/1")
-    CELERY_RESULT_URL = os.getenv("CELERY_RESULT_URL", "redis://localhost:6379/2")
+    # Rotinas periódicas (follow-up e timeout de handoff). Chamadas por agendador
+    # externo em /api/jobs/ciclo. Segredo obrigatório em produção: é um endpoint
+    # que gasta dinheiro — cada follow-up fora da janela de 24h é conversa paga.
+    JOBS_SECRET = os.getenv("JOBS_SECRET", "")
 
     # SSL/HTTPS
     SSL_CERTFILE = os.getenv("SSL_CERTFILE", "")
