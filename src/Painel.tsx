@@ -13,7 +13,7 @@
  * alguém esperando, ninguém vê.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { colors, fonts, radius } from './brand/tokens';
+import { colors, fonts, radius, texto } from './brand/tokens';
 import {
   AgendaFollowUp,
   Cartao,
@@ -23,13 +23,16 @@ import {
   ListaLeads,
   TabelaOrigens,
   TabelaProcedimentos,
+  Termometro,
   botaoSecundario,
 } from './painel/componentes';
 import {
+  ajustarTemperatura,
   assumirAtendimento,
   cancelarFollowUp,
   carregarAgendaFollowUp,
   carregarFilaHandoff,
+  carregarTemperatura,
   carregarFunil,
   carregarLeads,
   carregarOrigens,
@@ -41,10 +44,12 @@ import {
   ROTULO_ESTAGIO,
   type Estagio,
   type EtapaFunil,
+  type FaixaTemperatura,
   type ItemFollowUp,
   type ItemHandoff,
   type Lead,
   type MetricasTempo,
+  type Temperatura,
   type OrigemLead,
   type ProcedimentoDemanda,
   type ResumoPainel,
@@ -76,6 +81,7 @@ interface Props {
 export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
   const [dias, setDias] = useState<number>(30);
   const [filtroEstagio, setFiltroEstagio] = useState<Estagio | 'todos'>('todos');
+  const [filtroTemperatura, setFiltroTemperatura] = useState<Temperatura | 'todas'>('todas');
   const [busca, setBusca] = useState('');
 
   const [resumo, setResumo] = useState<ResumoPainel | null>(null);
@@ -83,6 +89,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
   const [fila, setFila] = useState<ItemHandoff[]>([]);
   const [agendaFollowUp, setAgendaFollowUp] = useState<ItemFollowUp[]>([]);
   const [tempo, setTempo] = useState<MetricasTempo | null>(null);
+  const [faixas, setFaixas] = useState<FaixaTemperatura[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [origens, setOrigens] = useState<OrigemLead[]>([]);
   const [procedimentos, setProcedimentos] = useState<ProcedimentoDemanda[]>([]);
@@ -91,7 +98,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
 
   const recarregar = useCallback(async () => {
     try {
-      const [r, f, fl, o, p, ag, tp] = await Promise.all([
+      const [r, f, fl, o, p, ag, tp, tm] = await Promise.all([
         carregarResumo(clinicId, dias),
         carregarFunil(clinicId, dias),
         carregarFilaHandoff(clinicId),
@@ -99,8 +106,10 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
         carregarProcedimentosDemanda(clinicId),
         carregarAgendaFollowUp(clinicId),
         carregarMetricasTempo(clinicId, dias),
+        carregarTemperatura(clinicId, dias),
       ]);
       setTempo(tp);
+      setFaixas(tm);
       setResumo(r);
       setFunil(f);
       setFila(fl);
@@ -130,7 +139,14 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
     let vivo = true;
     const atraso = setTimeout(async () => {
       try {
-        const l = await carregarLeads(clinicId, { estagio: filtroEstagio, busca });
+        const l = await carregarLeads(clinicId, {
+          estagio: filtroEstagio,
+          temperatura: filtroTemperatura,
+          busca,
+          // Só quando o filtro veio do termômetro, que conta apenas ativos.
+          // Assim o número do card e o tamanho da lista batem.
+          apenasAtivos: filtroTemperatura !== 'todas' && filtroEstagio === 'todos',
+        });
         if (vivo) setLeads(l);
       } catch (e) {
         if (vivo) setErro((e as Error).message);
@@ -140,7 +156,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
       vivo = false;
       clearTimeout(atraso);
     };
-  }, [clinicId, filtroEstagio, busca]);
+  }, [clinicId, filtroEstagio, filtroTemperatura, busca]);
 
   async function assumir(id: string) {
     if (!userId) return;
@@ -156,6 +172,22 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
   async function cancelarReengajamento(id: string, definitivo: boolean) {
     await cancelarFollowUp(id, definitivo);
     await recarregar();
+  }
+
+  async function mudarTemperatura(id: string, t: Temperatura) {
+    // Otimista: a etiqueta muda na hora. Quem está atendendo não pode esperar
+    // ida e volta de rede para ver a própria ação refletida.
+    setLeads((atuais) =>
+      atuais.map((l) =>
+        l.conversation_id === id ? { ...l, temperatura: t, temperatura_avaliada: true } : l
+      )
+    );
+    try {
+      await ajustarTemperatura(id, t, 'Ajustado pela equipe no painel');
+      await recarregar();
+    } catch (e) {
+      setErro((e as Error).message);
+    }
   }
 
   const gargalo = useMemo(() => encontrarGargalo(funil), [funil]);
@@ -177,10 +209,10 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
         }}
       >
         <div>
-          <h1 style={{ fontFamily: fonts.display, fontSize: 28, color: colors.ink, margin: 0 }}>
+          <h1 style={{ fontFamily: fonts.display, fontSize: texto.pagina, color: colors.ink, margin: 0 }}>
             Atendimento
           </h1>
-          <p style={{ fontSize: 14, color: colors.textMuted, margin: '6px 0 0' }}>
+          <p style={{ fontSize: texto.corpo, color: colors.textMuted, margin: '6px 0 0' }}>
             O que a Solara fez pela clínica nos últimos {dias} dias.
           </p>
         </div>
@@ -215,7 +247,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
           style={{
             padding: '12px 16px',
             marginBottom: 20,
-            fontSize: 13.5,
+            fontSize: texto.corpo,
             color: colors.danger,
             background: '#FDF3F2',
             borderLeft: `3px solid ${colors.danger}`,
@@ -234,7 +266,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
             aparte={
               <span
                 style={{
-                  fontSize: 12.5,
+                  fontSize: texto.apoio,
                   fontWeight: 600,
                   color: fila.some((f) => f.atrasado_para_assumir) ? colors.danger : colors.textMuted,
                 }}
@@ -279,6 +311,27 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
         </div>
       )}
 
+      {/* Temperatura antes dos números do período: é o que diz em quem mexer
+          agora. O resto da tela conta como foi o mês. */}
+      {faixas.length > 0 && (
+        <div style={{ marginBottom: 22 }}>
+          <Cartao
+            titulo="Termômetro dos leads"
+            aparte={
+              <span style={{ fontSize: texto.apoio, color: colors.textMuted }}>
+                clique para filtrar a lista
+              </span>
+            }
+          >
+            <Termometro
+              faixas={faixas}
+              filtroAtivo={filtroTemperatura}
+              aoFiltrar={setFiltroTemperatura}
+            />
+          </Cartao>
+        </div>
+      )}
+
       {/* O que a clínica está comprando: tempo. Vem antes do funil porque é a
           proposta de valor — funil mede resultado, isto mede o serviço. */}
       {tempo && tempo.respostas > 0 && (
@@ -286,7 +339,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
           <Cartao
             titulo="Tempo de espera"
             aparte={
-              <span style={{ fontSize: 12.5, color: colors.textMuted }}>
+              <span style={{ fontSize: texto.apoio, color: colors.textMuted }}>
                 {tempo.respostas} respostas medidas
               </span>
             }
@@ -335,7 +388,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
         <Cartao
           titulo="Funil"
           aparte={
-            <span style={{ fontSize: 12.5, color: colors.textMuted }}>
+            <span style={{ fontSize: texto.apoio, color: colors.textMuted }}>
               dos leads que entraram no período
             </span>
           }
@@ -346,7 +399,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
               style={{
                 margin: '18px 0 0',
                 padding: '10px 12px',
-                fontSize: 13.5,
+                fontSize: texto.corpo,
                 lineHeight: 1.55,
                 color: colors.ink,
                 background: colors.sand,
@@ -368,7 +421,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
           <Cartao
             titulo="Reengajamento"
             aparte={
-              <span style={{ fontSize: 12.5, color: colors.textMuted }}>
+              <span style={{ fontSize: texto.apoio, color: colors.textMuted }}>
                 {agendaFollowUp.filter((a) => a.sera_cobrado).length > 0
                   ? `${agendaFollowUp.filter((a) => a.sera_cobrado).length} abrirão conversa paga`
                   : 'todos dentro da janela gratuita'}
@@ -408,7 +461,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
             style={{
               padding: '7px 11px',
               fontFamily: fonts.body,
-              fontSize: 13.5,
+              fontSize: texto.corpo,
               minWidth: 220,
               color: colors.ink,
               border: `1px solid ${colors.border}`,
@@ -429,7 +482,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
                 style={{
                   padding: '5px 12px',
                   fontFamily: fonts.body,
-                  fontSize: 12.5,
+                  fontSize: texto.apoio,
                   fontWeight: ativo ? 600 : 500,
                   color: ativo ? colors.white : colors.inkSoft,
                   background: ativo ? colors.plum : colors.white,
@@ -443,7 +496,7 @@ export default function Painel({ clinicId, userId, aoAbrirBriefing }: Props) {
             );
           })}
         </div>
-        <ListaLeads leads={leads} />
+        <ListaLeads leads={leads} aoAjustarTemperatura={mudarTemperatura} />
       </Cartao>
     </div>
   );

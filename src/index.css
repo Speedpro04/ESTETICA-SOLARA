@@ -36,6 +36,20 @@
   padding: 0;
 }
 
+/* Teto de peso: 600, decisão de marca.
+
+   O navegador dá 700 para <strong> e <b> por padrão, e é daí que vinha o
+   negrito pesado que destoava do resto da interface — o texto em linha usa 600,
+   e uma palavra dentro de <strong> saltava sozinha. Normalizar aqui resolve as
+   17 ocorrências de uma vez, sem trocar tag por <span> estilizado.
+
+   Ver `peso` em src/brand/tokens.ts. */
+strong,
+b,
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
 html {
   font-size: 18px;
 }

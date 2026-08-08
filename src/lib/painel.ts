@@ -21,6 +21,15 @@ export type Estagio =
 
 export type Agente = 'sdr' | 'agendador' | 'follow_up' | 'handoff' | null;
 
+export type Temperatura = 'frio' | 'morno' | 'quente';
+
+export interface FaixaTemperatura {
+  temperatura: Temperatura;
+  total: number;
+  parados_24h: number;
+  agendaram: number;
+}
+
 export interface EtapaFunil {
   estagio: Estagio;
   ordem: number;
@@ -47,6 +56,10 @@ export interface Lead {
   contact_name: string | null;
   stage: Estagio;
   agente_atual: Agente;
+  temperatura: Temperatura;
+  /** false = ninguém leu a conversa ainda; o valor veio dos sinais. */
+  temperatura_avaliada: boolean;
+  temperatura_motivo: string | null;
   origem: string;
   procedure_id: string | null;
   interesse: string | null;
@@ -159,11 +172,61 @@ export async function carregarResumo(clinicId: string, dias = 30): Promise<Resum
   };
 }
 
+/** Quantos leads em cada temperatura, e quantos estão esfriando. */
+export async function carregarTemperatura(
+  clinicId: string,
+  dias = 30
+): Promise<FaixaTemperatura[]> {
+  const { data, error } = await supabase.rpc('painel_temperatura', {
+    p_clinic_id: clinicId,
+    p_dias: dias,
+  });
+  if (error) throw error;
+  return (data ?? []).map((f: FaixaTemperatura) => ({
+    ...f,
+    total: Number(f.total),
+    parados_24h: Number(f.parados_24h),
+    agendaram: Number(f.agendaram),
+  }));
+}
+
+/**
+ * A equipe discorda da leitura da IA.
+ *
+ * Existe porque quem atende no balcão sabe coisas que não estão na conversa —
+ * que a pessoa é indicação de uma cliente antiga, que já ligou antes. Travar a
+ * temperatura no julgamento do modelo desperdiça isso.
+ */
+export async function ajustarTemperatura(
+  conversationId: string,
+  temperatura: Temperatura,
+  motivo: string
+) {
+  const { error } = await supabase
+    .from('conversations')
+    .update({
+      temperatura,
+      temperatura_em: new Date().toISOString(),
+      temperatura_motivo: motivo,
+    })
+    .eq('id', conversationId);
+  if (error) throw error;
+}
+
 export interface FiltroLeads {
   estagio?: Estagio | 'todos';
+  temperatura?: Temperatura | 'todas';
   origem?: string | 'todas';
   busca?: string;
   limite?: number;
+  /**
+   * Esconde perdidos e encerrados.
+   *
+   * Ligado junto com o filtro de temperatura, porque o termômetro conta só
+   * leads ativos: clicar em "FRIO 3" e a lista mostrar 5 faz a equipe
+   * desconfiar do painel inteiro, e com razão.
+   */
+  apenasAtivos?: boolean;
 }
 
 export async function carregarLeads(clinicId: string, filtro: FiltroLeads = {}): Promise<Lead[]> {
@@ -176,6 +239,12 @@ export async function carregarLeads(clinicId: string, filtro: FiltroLeads = {}):
 
   if (filtro.estagio && filtro.estagio !== 'todos') query = query.eq('stage', filtro.estagio);
   if (filtro.origem && filtro.origem !== 'todas') query = query.eq('origem', filtro.origem);
+  if (filtro.temperatura && filtro.temperatura !== 'todas') {
+    query = query.eq('temperatura', filtro.temperatura);
+  }
+  if (filtro.apenasAtivos) {
+    query = query.not('stage', 'in', '("perdido","encerrado")');
+  }
 
   const busca = filtro.busca?.trim();
   if (busca) {
@@ -372,6 +441,19 @@ export const ROTULO_AGENTE: Record<string, string> = {
   agendador: 'Agendador',
   follow_up: 'Follow-up',
   handoff: 'Equipe',
+};
+
+export const ROTULO_TEMPERATURA: Record<Temperatura, string> = {
+  quente: 'Quente',
+  morno: 'Morno',
+  frio: 'Frio',
+};
+
+/** O que a Solara faz em cada temperatura — a equipe precisa saber o que esperar. */
+export const EXPLICA_TEMPERATURA: Record<Temperatura, string> = {
+  quente: 'Quer marcar. A Solara não faz mais pergunta, passa direto pro agendamento.',
+  morno: 'Tem interesse, mas algo trava. A Solara resolve essa objeção e propõe o próximo passo.',
+  frio: 'Está pesquisando. A Solara informa e faz a pessoa perceber o que ganha — sem empurrar horário.',
 };
 
 export const ROTULO_URGENCIA: Record<string, string> = {

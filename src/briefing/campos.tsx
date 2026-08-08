@@ -7,12 +7,12 @@
  * com nota do lote" está em quem preenche entender para que serve o campo.
  */
 import type { ReactNode } from 'react';
-import { colors, fonts, radius } from '../brand/tokens';
+import { colors, fonts, radius, texto } from '../brand/tokens';
 
 const estiloRotulo: React.CSSProperties = {
   display: 'block',
   fontFamily: fonts.body,
-  fontSize: 14,
+  fontSize: texto.corpo,
   fontWeight: 600,
   color: colors.ink,
   marginBottom: 4,
@@ -21,7 +21,7 @@ const estiloRotulo: React.CSSProperties = {
 const estiloDica: React.CSSProperties = {
   display: 'block',
   fontFamily: fonts.body,
-  fontSize: 12.5,
+  fontSize: texto.apoio,
   lineHeight: 1.5,
   color: colors.textMuted,
   marginBottom: 8,
@@ -32,7 +32,7 @@ const estiloEntrada: React.CSSProperties = {
   boxSizing: 'border-box',
   padding: '10px 12px',
   fontFamily: fonts.body,
-  fontSize: 14.5,
+  fontSize: texto.corpo,
   color: colors.ink,
   background: colors.white,
   border: `1px solid ${colors.border}`,
@@ -125,7 +125,7 @@ export function Numero({ valor, aoMudar, min, max, sufixo }: NumeroProps) {
         style={{ ...estiloEntrada, maxWidth: 140 }}
       />
       {sufixo && (
-        <span style={{ fontFamily: fonts.body, fontSize: 14, color: colors.textMuted }}>
+        <span style={{ fontFamily: fonts.body, fontSize: texto.corpo, color: colors.textMuted }}>
           {sufixo}
         </span>
       )}
@@ -170,7 +170,7 @@ export function Escolha<T extends string>({ valor, opcoes, aoMudar }: EscolhaPro
             <span
               style={{
                 display: 'block',
-                fontSize: 14,
+                fontSize: texto.corpo,
                 fontWeight: ativa ? 600 : 500,
                 color: colors.ink,
               }}
@@ -181,7 +181,7 @@ export function Escolha<T extends string>({ valor, opcoes, aoMudar }: EscolhaPro
               <span
                 style={{
                   display: 'block',
-                  fontSize: 12.5,
+                  fontSize: texto.apoio,
                   color: colors.textMuted,
                   marginTop: 2,
                   lineHeight: 1.45,
@@ -226,7 +226,7 @@ export function Chave({ valor, aoMudar, rotulo, dica }: ChaveProps) {
           style={{
             display: 'block',
             fontFamily: fonts.body,
-            fontSize: 14,
+            fontSize: texto.corpo,
             fontWeight: 500,
             color: colors.ink,
           }}
@@ -238,7 +238,7 @@ export function Chave({ valor, aoMudar, rotulo, dica }: ChaveProps) {
             style={{
               display: 'block',
               fontFamily: fonts.body,
-              fontSize: 12.5,
+              fontSize: texto.apoio,
               color: colors.textMuted,
               lineHeight: 1.45,
             }}
@@ -285,7 +285,7 @@ export function Aviso({ children, tom = 'info' }: { children: ReactNode; tom?: '
         padding: '10px 12px',
         marginBottom: 18,
         fontFamily: fonts.body,
-        fontSize: 13,
+        fontSize: texto.apoio,
         lineHeight: 1.55,
         color: colors.ink,
         background: colors.sand,

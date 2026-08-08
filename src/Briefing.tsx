@@ -15,7 +15,7 @@
  *                          descobrir três semanas depois pela conversa ruim.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { colors, fonts, radius, shadow } from './brand/tokens';
+import { colors, fonts, radius, shadow, texto } from './brand/tokens';
 import { Area, Aviso, Campo, Chave, Escolha, ListaTexto, Numero, Texto } from './briefing/campos';
 import {
   carregarBriefing,
@@ -150,10 +150,10 @@ export default function Briefing({ clinicId }: { clinicId: string }) {
   return (
     <div style={{ display: 'flex', gap: 28, alignItems: 'flex-start', fontFamily: fonts.body }}>
       <nav style={{ width: 268, flexShrink: 0, position: 'sticky', top: 24 }}>
-        <h2 style={{ fontFamily: fonts.display, fontSize: 22, color: colors.ink, margin: '0 0 4px' }}>
+        <h2 style={{ fontFamily: fonts.display, fontSize: texto.secao, color: colors.ink, margin: '0 0 4px' }}>
           Briefing da clínica
         </h2>
-        <p style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.5, margin: '0 0 18px' }}>
+        <p style={{ fontSize: texto.apoio, color: colors.textMuted, lineHeight: 1.5, margin: '0 0 18px' }}>
           É isto que a Solara sabe sobre vocês. Quanto mais completo, melhor ela vende.
         </p>
 
@@ -179,13 +179,13 @@ export default function Briefing({ clinicId }: { clinicId: string }) {
               }}
             >
               <span style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: ativa ? 600 : 500, color: colors.ink }}>
+                <span style={{ fontSize: texto.corpo, fontWeight: ativa ? 600 : 500, color: colors.ink }}>
                   {s.titulo}
                 </span>
                 {prog && (
                   <span
                     style={{
-                      fontSize: 11.5,
+                      fontSize: texto.micro,
                       fontWeight: 600,
                       color: prog.preenchidos >= prog.total ? colors.success : colors.textMuted,
                     }}
@@ -194,7 +194,7 @@ export default function Briefing({ clinicId }: { clinicId: string }) {
                   </span>
                 )}
               </span>
-              <span style={{ display: 'block', fontSize: 12, color: colors.textMuted, marginTop: 2 }}>
+              <span style={{ display: 'block', fontSize: texto.rotulo, color: colors.textMuted, marginTop: 2 }}>
                 {s.resumo}
               </span>
             </button>
@@ -215,13 +215,13 @@ export default function Briefing({ clinicId }: { clinicId: string }) {
               boxShadow: shadow.sm,
             }}
           >
-            <strong style={{ fontSize: 14, color: colors.ink }}>
+            <strong style={{ fontSize: texto.corpo, color: colors.ink }}>
               Falta {pendencias.length === 1 ? 'um item' : `${pendencias.length} itens`} para a
               Solara começar a atender
             </strong>
             <ul style={{ margin: '8px 0 0', paddingLeft: 18 }}>
               {pendencias.map((p) => (
-                <li key={p.item} style={{ fontSize: 13, color: colors.inkSoft, lineHeight: 1.6 }}>
+                <li key={p.item} style={{ fontSize: texto.apoio, color: colors.inkSoft, lineHeight: 1.6 }}>
                   <b>{ROTULO_PRONTIDAO[p.item] ?? p.item}</b> — {p.detalhe}
                 </li>
               ))}
@@ -287,7 +287,7 @@ export default function Briefing({ clinicId }: { clinicId: string }) {
                 style={{
                   padding: '10px 22px',
                   fontFamily: fonts.body,
-                  fontSize: 14,
+                  fontSize: texto.corpo,
                   fontWeight: 600,
                   color: colors.white,
                   background: salvando ? colors.textMuted : colors.rose,
@@ -299,7 +299,7 @@ export default function Briefing({ clinicId }: { clinicId: string }) {
                 {salvando ? 'Salvando…' : 'Salvar esta seção'}
               </button>
               {aviso && (
-                <span style={{ fontSize: 13.5, color: aviso.erro ? colors.danger : colors.success }}>
+                <span style={{ fontSize: texto.corpo, color: aviso.erro ? colors.danger : colors.success }}>
                   {aviso.texto}
                 </span>
               )}
@@ -329,11 +329,11 @@ function Centro({ children }: { children: React.ReactNode }) {
 function Titulo({ children, sub }: { children: React.ReactNode; sub?: string }) {
   return (
     <div style={{ marginBottom: 22 }}>
-      <h3 style={{ fontFamily: fonts.display, fontSize: 20, color: colors.ink, margin: 0 }}>
+      <h3 style={{ fontFamily: fonts.display, fontSize: texto.secao, color: colors.ink, margin: 0 }}>
         {children}
       </h3>
       {sub && (
-        <p style={{ fontSize: 13.5, color: colors.textMuted, lineHeight: 1.55, margin: '6px 0 0' }}>
+        <p style={{ fontSize: texto.corpo, color: colors.textMuted, lineHeight: 1.55, margin: '6px 0 0' }}>
           {sub}
         </p>
       )}
@@ -811,7 +811,7 @@ function SecaoAgenda({
                 style={{
                   padding: '8px 14px',
                   fontFamily: fonts.body,
-                  fontSize: 13.5,
+                  fontSize: texto.corpo,
                   fontWeight: ativo ? 600 : 500,
                   color: ativo ? colors.white : colors.inkSoft,
                   background: ativo ? colors.rose : colors.white,
@@ -837,7 +837,7 @@ function SecaoAgenda({
                 key={`${janela.dia_semana}-${indice}`}
                 style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}
               >
-                <span style={{ width: 78, fontSize: 13.5, color: colors.inkSoft }}>{dia?.longo}</span>
+                <span style={{ width: 78, fontSize: texto.corpo, color: colors.inkSoft }}>{dia?.longo}</span>
                 <input
                   type="time"
                   value={janela.abre?.slice(0, 5) ?? ''}
@@ -882,7 +882,7 @@ function SecaoAgenda({
                   remover
                 </button>
                 {invalida && (
-                  <span style={{ fontSize: 12.5, color: colors.danger }}>
+                  <span style={{ fontSize: texto.apoio, color: colors.danger }}>
                     o fechamento tem que ser depois da abertura
                   </span>
                 )}
@@ -1039,7 +1039,7 @@ function SecaoAtendimento({ dados, editar }: PropsSecao) {
 const botaoDiscreto: React.CSSProperties = {
   padding: '5px 9px',
   fontFamily: fonts.body,
-  fontSize: 12.5,
+  fontSize: texto.apoio,
   color: colors.inkSoft,
   background: 'transparent',
   border: `1px solid ${colors.border}`,
@@ -1130,8 +1130,8 @@ function SecaoProcedimentos({
           }}
         >
           <div style={{ minWidth: 0 }}>
-            <strong style={{ fontSize: 14, color: colors.ink }}>{p.nome}</strong>
-            <span style={{ display: 'block', fontSize: 12.5, color: colors.textMuted, marginTop: 2 }}>
+            <strong style={{ fontSize: texto.corpo, color: colors.ink }}>{p.nome}</strong>
+            <span style={{ display: 'block', fontSize: texto.apoio, color: colors.textMuted, marginTop: 2 }}>
               {p.categoria}
               {p.apelidos.length > 0 && ` · ${p.apelidos.join(', ')}`}
               {p.preco_de_centavos !== null && ` · a partir de R$ ${deCentavos(p.preco_de_centavos)}`}
@@ -1160,7 +1160,7 @@ function SecaoProcedimentos({
             marginTop: 12,
             padding: '10px 20px',
             fontFamily: fonts.body,
-            fontSize: 14,
+            fontSize: texto.corpo,
             fontWeight: 600,
             color: colors.white,
             background: colors.rose,
@@ -1259,7 +1259,7 @@ function SecaoProcedimentos({
             dica="Se sim, o Agendador marca a avaliação — nunca o procedimento direto."
           />
 
-          {erro && <p style={{ color: colors.danger, fontSize: 13 }}>{erro}</p>}
+          {erro && <p style={{ color: colors.danger, fontSize: texto.apoio }}>{erro}</p>}
 
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             <button
@@ -1268,7 +1268,7 @@ function SecaoProcedimentos({
               style={{
                 padding: '9px 20px',
                 fontFamily: fonts.body,
-                fontSize: 14,
+                fontSize: texto.corpo,
                 fontWeight: 600,
                 color: colors.white,
                 background: colors.rose,
@@ -1332,7 +1332,7 @@ function SecaoObjecoes({
           style={{ padding: '12px 14px', marginBottom: 8, background: colors.sand, borderRadius: radius.base }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-            <strong style={{ fontSize: 14, color: colors.ink }}>"{o.objecao}"</strong>
+            <strong style={{ fontSize: texto.corpo, color: colors.ink }}>"{o.objecao}"</strong>
             <button
               type="button"
               onClick={async () => {
@@ -1347,7 +1347,7 @@ function SecaoObjecoes({
               remover
             </button>
           </div>
-          <p style={{ fontSize: 13.5, color: colors.inkSoft, lineHeight: 1.55, margin: '6px 0 0' }}>
+          <p style={{ fontSize: texto.corpo, color: colors.inkSoft, lineHeight: 1.55, margin: '6px 0 0' }}>
             {o.resposta}
           </p>
         </div>
@@ -1383,7 +1383,7 @@ function SecaoObjecoes({
           style={{
             padding: '9px 20px',
             fontFamily: fonts.body,
-            fontSize: 14,
+            fontSize: texto.corpo,
             fontWeight: 600,
             color: colors.white,
             background: colors.rose,

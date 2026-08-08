@@ -113,6 +113,41 @@ export const fonts = {
   body: "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 } as const;
 
+/**
+ * Escala tipográfica — sete degraus, e nada fora deles.
+ *
+ * Antes eram catorze tamanhos, com 12.5, 13.5 e 14.5 no meio. Meio-ponto é o
+ * que se escreve empurrando pixel até "ficar bom", não seguindo um sistema — e
+ * num produto vendido como alto padrão, a disciplina tipográfica é parte do que
+ * se está vendendo.
+ *
+ * Consequência prática: com escala, dá para aumentar tudo em tela grande
+ * multiplicando um objeto. Com catorze valores soltos, não há o que multiplicar.
+ */
+export const texto = {
+  micro: 11,     // etiqueta, marca de "estimado"
+  rotulo: 12,    // rótulo em caixa alta sobre indicador
+  apoio: 13,     // legenda, texto secundário, dica de campo
+  corpo: 14,     // texto padrão, tabela, botão
+  destaque: 17,  // título de cartão, número dentro da barra do funil
+  secao: 20,     // título de seção
+  pagina: 28,    // h1 da tela
+  numero: 32,    // indicador grande
+} as const;
+
+/**
+ * Pesos. O teto é 600 — decisão de marca.
+ *
+ * `strong` e `b` puxam 700 do navegador por padrão, e é isso que dá o negrito
+ * pesado que destoa do resto. index.css normaliza os dois para 600; aqui fica a
+ * referência de quem escreve estilo em linha.
+ */
+export const peso = {
+  normal: 400,
+  medio: 500,
+  forte: 600, // máximo. Não existe 700 neste produto.
+} as const;
+
 /** Raio único de 3px no projeto inteiro (decisão de marca).
  *  `circle` fica de fora: é para bolinha de status e avatar, que viram
  *  quadrado se receberem raio fixo. */

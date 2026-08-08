@@ -13,6 +13,7 @@ Duas coisas aqui não são opcionais:
 import json
 import logging
 import re
+from dataclasses import dataclass, field
 
 from openai import AsyncOpenAI
 
@@ -20,8 +21,37 @@ from ..config import settings
 
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY, base_url=settings.OPENAI_BASE_URL)
 
+# Cliente reserva: só é construído se houver chave, e só é usado quando a
+# principal falha por credencial ou cota. Ver _chamar().
+cliente_reserva = (
+    AsyncOpenAI(api_key=settings.OPENAI_API_KEY_RESERVA, base_url=settings.OPENAI_BASE_URL)
+    if settings.OPENAI_API_KEY_RESERVA
+    else None
+)
+
 PAPEIS_VALIDOS = {"user", "assistant"}
 _MAX_RODADAS_FERRAMENTA = 2
+
+
+@dataclass
+class Consumo:
+    """Quanto custou a resposta. Vai gravado junto com a mensagem.
+
+    É o que permite ver custo por agente, por clínica e por conversa no próprio
+    painel — o relatório da OpenAI agrupa por projeto e não sabe nada disso.
+    """
+
+    tokens_entrada: int = 0
+    tokens_saida: int = 0
+    modelo: str = ""
+    usou_reserva: bool = False
+
+
+@dataclass
+class Resultado:
+    texto: str = ""
+    chamadas: list[dict] = field(default_factory=list)
+    consumo: Consumo = field(default_factory=Consumo)
 
 
 # --- Rede de segurança contra reapresentação ---------------------------------
@@ -90,6 +120,37 @@ def _normalizar_historico(historico: list | None) -> list[dict[str, str]]:
     return saida
 
 
+# Erros que valem tentar de novo com a chave reserva: são de CREDENCIAL ou COTA,
+# não do conteúdo do pedido. Repetir um pedido malformado com outra chave só
+# gastaria a segunda também.
+_FALHAS_DE_CHAVE = ("authenticationerror", "permissiondenied", "ratelimit", "insufficient_quota", "billing")
+
+
+def _vale_tentar_reserva(exc: Exception) -> bool:
+    assinatura = f"{type(exc).__name__} {exc}".lower()
+    return any(marca in assinatura for marca in _FALHAS_DE_CHAVE)
+
+
+async def _chamar(kwargs: dict, consumo: Consumo):
+    """Chama o modelo; se a chave principal falhar por credencial/cota, usa a reserva."""
+    try:
+        resposta = await client.chat.completions.create(**kwargs)
+    except Exception as exc:
+        if not (cliente_reserva and _vale_tentar_reserva(exc)):
+            raise
+        logging.warning("Chave principal falhou (%s). Tentando a reserva.", type(exc).__name__)
+        resposta = await cliente_reserva.chat.completions.create(**kwargs)
+        consumo.usou_reserva = True
+
+    uso = getattr(resposta, "usage", None)
+    if uso:
+        # Acumula: uma resposta com ferramenta faz mais de uma ida ao modelo, e
+        # todas custam.
+        consumo.tokens_entrada += getattr(uso, "prompt_tokens", 0) or 0
+        consumo.tokens_saida += getattr(uso, "completion_tokens", 0) or 0
+    return resposta
+
+
 async def conversar(
     system: str,
     mensagem: str,
@@ -97,23 +158,27 @@ async def conversar(
     ferramentas: list[dict] | None = None,
     executar_ferramenta=None,
     apresentar: bool = False,
-) -> tuple[str, list[dict]]:
+    modelo: str | None = None,
+) -> Resultado:
     """Gera a resposta da Solara.
 
-    Devolve (texto, chamadas_de_ferramenta_executadas). O chamador usa as chamadas
-    para saber o que o agente decidiu — qualificar, agendar, escalar.
+    `modelo` vem do agente: o SDR usa o melhor porque é onde há nuance de
+    verdade; Agendador e Follow-up usam o econômico, já que suas travas estão no
+    código e no banco, não no julgamento do modelo.
     """
     mensagens = [{"role": "system", "content": system}]
     mensagens.extend(_normalizar_historico(historico))
     mensagens.append({"role": "user", "content": mensagem.strip()})
 
+    modelo_usado = modelo or settings.MODEL_LLM
+    consumo = Consumo(modelo=modelo_usado)
     executadas: list[dict] = []
 
     def _kwargs():
         # Modelos de raciocínio exigem max_completion_tokens (não max_tokens) e
         # só aceitam temperature padrão, por isso ela é omitida.
         kw = {
-            "model": settings.MODEL_LLM,
+            "model": modelo_usado,
             "messages": mensagens,
             "max_completion_tokens": 1024,
             "extra_body": {"reasoning_effort": "low"},  # chat em tempo real
@@ -123,10 +188,10 @@ async def conversar(
         return kw
 
     try:
-        resposta = await client.chat.completions.create(**_kwargs())
+        resposta = await _chamar(_kwargs(), consumo)
     except Exception as exc:
         logging.exception("Falha na chamada ao modelo: %s", exc)
-        return "", []
+        return Resultado(consumo=consumo)
 
     mensagem_modelo = resposta.choices[0].message
 
@@ -156,7 +221,7 @@ async def conversar(
             })
 
         try:
-            resposta = await client.chat.completions.create(**_kwargs())
+            resposta = await _chamar(_kwargs(), consumo)
             mensagem_modelo = resposta.choices[0].message
         except Exception as exc:
             logging.exception("Falha na rodada de ferramenta: %s", exc)
@@ -165,4 +230,4 @@ async def conversar(
     texto = mensagem_modelo.content or ""
     if not apresentar:
         texto = remover_reapresentacao(texto)
-    return texto, executadas
+    return Resultado(texto=texto, chamadas=executadas, consumo=consumo)

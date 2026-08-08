@@ -7,7 +7,7 @@
  * a chance de ninguém achar o que precisa.
  */
 import { useEffect, useState } from 'react';
-import { colors, fonts, radius } from './brand/tokens';
+import { colors, fonts, radius, texto } from './brand/tokens';
 import Briefing from './Briefing';
 import Painel from './Painel';
 import { supabase } from './lib/supabase';
@@ -62,11 +62,11 @@ export default function Operacional({ clinicId, onLogout }: Props) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
-          <span style={{ fontFamily: fonts.display, fontSize: 20, color: colors.goldLight }}>
+          <span style={{ fontFamily: fonts.display, fontSize: texto.secao, color: colors.goldLight }}>
             Solara
           </span>
           {nomeClinica && (
-            <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.62)' }}>{nomeClinica}</span>
+            <span style={{ fontSize: texto.corpo, color: 'rgba(255,255,255,0.62)' }}>{nomeClinica}</span>
           )}
         </div>
 
@@ -86,7 +86,7 @@ export default function Operacional({ clinicId, onLogout }: Props) {
                 style={{
                   padding: '7px 16px',
                   fontFamily: fonts.body,
-                  fontSize: 13.5,
+                  fontSize: texto.corpo,
                   fontWeight: ativa ? 600 : 500,
                   color: ativa ? colors.ink : 'rgba(255,255,255,0.78)',
                   background: ativa ? colors.goldLight : 'transparent',
@@ -107,7 +107,7 @@ export default function Operacional({ clinicId, onLogout }: Props) {
           style={{
             padding: '7px 14px',
             fontFamily: fonts.body,
-            fontSize: 13,
+            fontSize: texto.apoio,
             color: 'rgba(255,255,255,0.78)',
             background: 'transparent',
             border: '1px solid rgba(255,255,255,0.22)',

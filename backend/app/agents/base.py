@@ -27,6 +27,14 @@ class Resposta:
     escalar: bool = False
     severidade: str = "media"
 
+    # Contabilidade: quanto custou e qual versão do prompt escreveu. O roteador
+    # grava junto com a mensagem — é o que permite ver custo por agente e
+    # comparar versões de prompt depois de um ajuste.
+    tokens_entrada: int = 0
+    tokens_saida: int = 0
+    modelo: str = ""
+    prompt_versao: str = ""
+
 
 IDENTIDADE = """Você é a SOLARA, a gestora virtual de atendimento da clínica — quem recebe, organiza, encanta e converte cada contato.
 

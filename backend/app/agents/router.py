@@ -67,8 +67,17 @@ async def processar_mensagem(
     phone_number_id = evento["phone_number_id"]
     texto = (evento.get("content") or "").strip()
 
+    # Só o primeiro balão carrega o consumo do turno: a resposta é dividida em
+    # vários, mas a chamada ao modelo foi uma só. Repetir os tokens em cada
+    # balão multiplicaria o custo no relatório.
+    consumo_pendente: dict[str, Any] = {}
+
     def _registrar(bubble: str, wamid: str | None, agente: str | None) -> None:
-        conv.registrar_saida(clinic_id, conversation_id, bubble, agent=agente, wa_message_id=wamid)
+        extras = consumo_pendente.copy()
+        consumo_pendente.clear()
+        conv.registrar_saida(
+            clinic_id, conversation_id, bubble, agent=agente, wa_message_id=wamid, **extras
+        )
 
     # ---- 2. Trava de atendimento --------------------------------------------
     if not estado.get("ia_deve_responder"):
@@ -136,6 +145,13 @@ async def processar_mensagem(
 
     if not resposta.texto.strip():
         return {"acao": "sem_texto", "agente": agente}
+
+    consumo_pendente.update({
+        "tokens_entrada": resposta.tokens_entrada,
+        "tokens_saida": resposta.tokens_saida,
+        "modelo": resposta.modelo,
+        "prompt_versao": resposta.prompt_versao,
+    })
 
     await enviar(phone_number_id, to, resposta.texto,
                  on_sent=lambda b, w: _registrar(b, w, agente))

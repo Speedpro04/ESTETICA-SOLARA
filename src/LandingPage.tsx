@@ -173,7 +173,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
   const faqs = [
     {
       q: 'O que é a Solara Estética?',
-      a: 'A Solara Estética é um sistema de gestão para clínicas de estética e cirurgia plástica com uma recepcionista de inteligência artificial que atende no WhatsApp. Ela agenda procedimentos, confirma consultas e responde pacientes 24 horas por dia, junto com agenda, prontuário e gestão de atendimento na mesma plataforma.'
+      a: 'A Solara Estética é uma recepcionista de inteligência artificial que atende o WhatsApp de clínicas de estética e cirurgia plástica. Ela responde a paciente em segundos, a qualquer hora, entende o que ela procura, oferece horários reais da agenda da clínica e marca a avaliação — usando só os dados que a clínica cadastrou, sem inventar preço nem horário. Não é sistema de gestão nem prontuário: faz duas coisas, atender e agendar, e faz bem.'
     },
     {
       q: 'Como a Solara reduz o no-show na minha clínica de estética?',
@@ -193,7 +193,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
     },
     {
       q: 'Os dados das minhas pacientes ficam seguros?',
-      a: 'Ficam. Ficha de anamnese, histórico de procedimento e foto de evolução são dados sensíveis pela LGPD (Lei 13.709/18). Os dados trafegam e ficam armazenados criptografados, cada clínica só enxerga a própria base por isolamento no banco de dados, e todo acesso a dado de paciente fica registrado em trilha de auditoria.'
+      a: 'Ficam. O que a paciente conta na conversa — o que a incomoda, o procedimento que procura, o que já fez antes — é dado sensível pela LGPD (Lei 13.709/18). As conversas trafegam e ficam armazenadas criptografadas, cada clínica só enxerga a própria base por isolamento no banco de dados, e cada decisão da IA fica registrada: o que ela respondeu, quando passou o atendimento para a equipe e por quê.'
     },
     {
       q: 'Preciso instalar algum programa?',
@@ -454,6 +454,101 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
         </div>
       </section>
 
+      {/* Tempo de resposta — o argumento central.
+          Fica alto na página, logo depois da faixa de especialidades, porque é a
+          única coisa aqui que um concorrente com formulário de contato não
+          consegue copiar: ele pode escrever "atendimento humanizado", não pode
+          responder domingo às 23h.
+          Nenhum número inventado: a prova é o convite para cronometrar no teste. */}
+      <section style={{ padding: isMobile ? '70px 0' : '110px 0' }}>
+        <div style={{ ...containerStyle, padding: '0 20px' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            style={{ textAlign: 'center', maxWidth: 820, margin: '0 auto 64px' }}
+          >
+            <p style={{ color: colors.goldText, fontSize: '0.9rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 20 }}>
+              O que realmente decide
+            </p>
+            <h2 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: 400, color: colors.primary, marginBottom: 24, lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+              Quem responde primeiro, leva.
+            </h2>
+            <p style={{ fontSize: '1.2rem', color: colors.primary, opacity: 0.72, lineHeight: 1.6 }}>
+              Sua paciente não escolhe a clínica que atende melhor. Escolhe a que atende <strong style={{ opacity: 1 }}>antes</strong> — porque enquanto ela espera, está conversando com outras três.
+            </p>
+          </motion.div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? 20 : 32, maxWidth: 940, margin: '0 auto' }}>
+            {[
+              {
+                titulo: 'Como é hoje',
+                cor: colors.cardBorder,
+                destaque: false,
+                linhas: [
+                  ['22h47, domingo', 'Ela manda mensagem perguntando sobre o procedimento.'],
+                  ['Domingo à noite', 'Ninguém vê. Ela pergunta em mais três clínicas.'],
+                  ['Segunda, 9h20', 'A recepção responde. Ela já marcou avaliação em outra.'],
+                ],
+              },
+              {
+                titulo: 'Com a Solara',
+                cor: colors.btnSuccess,
+                destaque: true,
+                linhas: [
+                  ['22h47, domingo', 'Ela manda a mesma mensagem.'],
+                  ['22h47, domingo', 'É respondida. Com o que a sua clínica cadastrou — sem inventar preço nem horário.'],
+                  ['22h51, domingo', 'Sai com a avaliação marcada, em horário que existe na sua agenda.'],
+                ],
+              },
+            ].map((coluna) => (
+              <motion.div
+                key={coluna.titulo}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                style={{
+                  padding: isMobile ? '28px 24px' : '36px 32px',
+                  background: coluna.destaque ? colors.cardBg : 'transparent',
+                  border: `1px solid ${colors.cardBorder}`,
+                  borderLeft: `3px solid ${coluna.cor}`,
+                  borderRadius: 3,
+                }}
+              >
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: colors.primary, marginBottom: 24, opacity: coluna.destaque ? 1 : 0.6 }}>
+                  {coluna.titulo}
+                </h3>
+                {coluna.linhas.map(([hora, texto], i) => (
+                  <div key={i} style={{ marginBottom: i === 2 ? 0 : 22 }}>
+                    <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.04em', color: coluna.destaque ? colors.btnSuccess : colors.primary, opacity: coluna.destaque ? 1 : 0.45, marginBottom: 4 }}>
+                      {hora}
+                    </span>
+                    <span style={{ display: 'block', fontSize: '1.02rem', lineHeight: 1.55, color: colors.primary, opacity: coluna.destaque ? 0.88 : 0.6 }}>
+                      {texto}
+                    </span>
+                  </div>
+                ))}
+              </motion.div>
+            ))}
+          </div>
+
+          {/* O convite substitui a estatística. Número de clínica ativa entra
+              aqui quando existir base para publicar — antes disso seria inventar,
+              que é o oposto do que esta página promete. */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{ textAlign: 'center', maxWidth: 680, margin: '56px auto 0', fontSize: '1.1rem', lineHeight: 1.6, color: colors.primary, opacity: 0.8 }}
+          >
+            Não precisa acreditar: nos seus 10 dias de teste, mande uma mensagem para a sua própria Solara às onze da noite e cronometre.
+          </motion.p>
+        </div>
+      </section>
+
       {/* Features Detail */}
       <section id="solucoes" style={{ padding: isMobile ? '70px 0 0 0' : '120px 0 0 0' }}>
         <div style={{ ...containerStyle, padding: '0 20px' }}>
@@ -467,8 +562,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
               { icon: <MessageSquare />, title: "Atendimento 24 horas", desc: "A Solara responde no WhatsApp de madrugada, no domingo e no feriado — com os dados reais da sua clínica, sem inventar preço nem horário." },
               { icon: <Calendar />, title: "Agendamento sem ligação", desc: "A paciente escolhe procedimento, profissional e horário na própria conversa. O agendamento entra direto na sua agenda." },
               { icon: <Clock />, title: "Menos no-show", desc: "Lembrete e confirmação automáticos antes da sessão. Horário vago é receita que não volta." },
-              { icon: <Building />, title: "Kanban de atendimento", desc: "Quem chegou, quem está em procedimento e quem já saiu — o dia inteiro numa tela só." },
-              { icon: <Stethoscope />, title: "Prontuário e histórico", desc: "Procedimentos, evolução e anotações de cada paciente reunidos em um lugar, prontos antes dela sentar na cadeira." },
+              { icon: <Building />, title: "Funil de leads na tela", desc: "Quem chegou, quem está sendo qualificado e quem já marcou. Com a temperatura de cada lead: quem quer marcar agora e quem ainda está pesquisando." },
+              { icon: <Stethoscope />, title: "Passa para a equipe na hora certa", desc: "Pergunta sobre contraindicação, risco ou reação adversa a IA não responde: ela chama a sua equipe na hora e sai da frente." },
               { icon: <ShieldCheck />, title: "LGPD desde o começo", desc: "Dado de paciente é dado sensível pela Lei 13.709/18. Cada clínica enxerga apenas a própria base, com isolamento no banco." }
             ].map((feat, i) => (
               <motion.div 
@@ -508,14 +603,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
             </div>
             <h2 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: 400, marginBottom: 24, lineHeight: '1.1', letterSpacing: '-0.02em' }}>Dado de estética é dado sensível.</h2>
             <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.72)', lineHeight: '1.6', marginBottom: 40 }}>
-              Foto de antes e depois, histórico de procedimento e ficha de anamnese são dados de saúde pela Lei 13.709/18 — a LGPD trata isso com regra mais dura que dado comum. A Solara foi construída com esse isolamento no banco desde o primeiro dia.
+              O que a paciente conta no WhatsApp — o que a incomoda, o procedimento que procura, o que já fez antes — é dado de saúde pela Lei 13.709/18, e a LGPD trata isso com regra mais dura que dado comum. A Solara foi construída com esse isolamento no banco desde o primeiro dia.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {[
                 "Isolamento por clínica no banco (RLS): sua base nunca cruza com a de outra.",
-                "Criptografia em trânsito e em repouso nos prontuários e anexos.",
-                "Registro de consentimento para uso de imagem e termo de procedimento.",
-                "Trilha de auditoria de cada acesso a dado de paciente."
+                "Criptografia em trânsito e em repouso em toda a conversa.",
+                "Número próprio por clínica, verificado na Meta — nada de número compartilhado.",
+                "Histórico de cada decisão da IA: o que ela respondeu, quando passou para a equipe e por quê."
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: '1.05rem', fontWeight: '500' }}>
                   <div style={{ width: 24, height: 24, borderRadius: '50%', background: colors.btnSuccess, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -557,16 +652,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
           <div style={{ textAlign: 'center', marginBottom: 80 }}>
             <h2 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: 400, marginBottom: 24, color: colors.primary, letterSpacing: '-0.02em' }}>Por dentro da Solara</h2>
             <p style={{ fontSize: '1.2rem', color: colors.primary, opacity: 0.72, maxWidth: 850, margin: '0 auto', lineHeight: '1.6' }}>
-              Sua recepção, sua agenda e o WhatsApp da clínica na mesma tela — pensada para quem atende procedimento estético, não para quem administra hospital.
+              O funil das suas pacientes, o tempo que cada uma esperou e a fila que precisa de você — numa tela só, pensada para quem atende procedimento estético.
             </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? '28px' : '48px' }}>
             {[
-              { img: '/recepcao.webp', title: 'Recepção Inteligente', alt: 'Painel de recepção da Solara com a fila de pacientes e as salas da clínica em tempo real', desc: 'Controle de fila e salas em tempo real.' },
-              { img: '/agenda.webp', title: 'Agenda da Clínica', alt: 'Agenda da clínica de estética com os procedimentos do dia por profissional', desc: 'Procedimentos do dia por profissional e por sala.' },
-              { img: '/prontuario.webp', title: 'Prontuário Digital', alt: 'Prontuário eletrônico da paciente com histórico de procedimentos e ficha de anamnese', desc: 'Histórico clínico unificado e seguro.' },
-              { img: '/whatsapp.webp', title: 'WhatsApp & IA', alt: 'Conversa no WhatsApp em que a Solara confirma a consulta da paciente', desc: 'Automação de lembretes e confirmação de presença no WhatsApp.' }
+              { img: '/recepcao.webp', title: 'Fila da equipe', alt: 'Painel da Solara com a fila de pacientes que aguardam atendimento humano', desc: 'Quem a IA passou para vocês, e há quanto tempo espera.' },
+              { img: '/agenda.webp', title: 'Funil de leads', alt: 'Funil de leads da clínica de estética, da primeira mensagem até o agendamento', desc: 'Da primeira mensagem até a avaliação marcada — e onde está vazando.' },
+              { img: '/prontuario.webp', title: 'Tempo de espera', alt: 'Indicadores de tempo de resposta da Solara, com a mediana da primeira resposta', desc: 'Quanto sua paciente esperou, e quanto foi atendido fora do expediente.' },
+              { img: '/whatsapp.webp', title: 'WhatsApp & IA', alt: 'Conversa no WhatsApp em que a Solara confirma a consulta da paciente', desc: 'Atendimento, agendamento e confirmação na conversa da paciente.' }
             ].map((item, i) => (
               <motion.div 
                 key={i}
@@ -596,7 +691,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
             }}
           >
             <p style={{ fontSize: '1.15rem', color: '#555', lineHeight: '1.6', fontWeight: '400' }}>
-              <strong style={{ color: colors.primary, fontWeight: '700' }}>Automação Inteligente de WhatsApp</strong> — Para clínicas de rotina padrão (até 50 lembretes diários), a integração é imediata, via QR Code e sem custos extras. Para clínicas com alto volume de campanhas de marketing (acima de 50 disparos/dia), nossa plataforma integra-se diretamente com a API Oficial da Meta para garantir a entrega e blindar seu número contra bloqueios (aplicam-se taxas de consumo da Meta).
+              <strong style={{ color: colors.primary, fontWeight: 600 }}>Só API oficial da Meta</strong> — A Solara não usa robô conectado por QR Code. A clínica tem número próprio verificado no Business Manager, com o WhatsApp Business seguindo normal no celular pelo recurso de coexistência. Atender quem chamou é ilimitado e não tem custo por mensagem. Mensagem que a clínica inicia depois de 24 horas sem resposta — lembrete de sessão e campanha de reativação — é cobrada pela Meta, e o painel mostra quais são e quanto vão custar antes de sair.
             </p>
           </motion.div>
         </div>
@@ -861,11 +956,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
                 {[
                   'Recepcionista de IA no WhatsApp, 24 horas por dia',
                   'API oficial da Meta, com o número que a clínica já usa',
-                  'Atendimento e lembrete de sessão ilimitados',
-                  'Até 500 mensagens de campanha de reativação por mês',
-                  'Agenda, prontuário e ficha de anamnese',
-                  'Especialistas, salas e usuários ilimitados',
-                  'Relatórios de faturamento, no-show e retorno',
+                  'Atender quem chama: ilimitado, sem custo por mensagem',
+                  'Campanhas de reativação da base fria, com teto que você define',
+                  'Agenda com horários reais — a IA nunca oferece o que não existe',
+                  'Até 3 profissionais na agenda, usuários ilimitados',
+                  'Funil de leads, tempo de resposta e origem de cada paciente',
                   'Suporte por WhatsApp com gente de verdade'
                 ].map((item) => (
                   <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: '1rem', color: colors.primary, opacity: 0.85, lineHeight: 1.5 }}>

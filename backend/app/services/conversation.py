@@ -207,10 +207,36 @@ def carregar_contexto(clinic_id: str) -> dict[str, Any]:
         ativo=True,
     )
     contexto["objecoes"] = _buscar("briefing_objections", "objecao, resposta, categoria", ativo=True)
+    contexto["topicos_proibidos"] = _topicos_proibidos(clinic_id)
     contexto["conhecimento"] = _buscar("clinic_knowledge", "kind, title, content", active=True)
     contexto["profissionais"] = _buscar_profissionais(clinic_id)
 
     return contexto
+
+
+def _topicos_proibidos(clinic_id: str) -> list[dict]:
+    """Regras de escalonamento do tipo 'topico' — as que o MODELO avalia.
+
+    A camada de palavra-chave pega o óbvio e falha na paráfrase: "minha amiga
+    fez e ficou com o rosto estranho, pode acontecer comigo?" não casa com
+    "contraindicação" nem com "efeito colateral", mas é pergunta de risco.
+
+    Estas regras existem para isso e ficavam mortas no banco — carregadas e
+    ignoradas — porque ninguém as entregava ao modelo. É aqui que elas saem.
+    """
+    try:
+        result = (
+            supabase_client.table("escalation_rules")
+            .select("rotulo, padrao, severidade")
+            .or_(f"clinic_id.is.null,clinic_id.eq.{clinic_id}")
+            .eq("tipo", "topico")
+            .eq("ativo", True)
+            .execute()
+        )
+        return result.data or []
+    except Exception as exc:
+        logging.warning("Falha ao carregar tópicos proibidos de %s: %s", clinic_id, exc)
+        return []
 
 
 def _buscar_clinica(clinic_id: str) -> dict | None:
@@ -279,8 +305,21 @@ def registrar_saida(
     template_name: str | None = None,
     categoria_cobranca: str | None = None,
     sender_type: str = "ia",
+    tokens_entrada: int | None = None,
+    tokens_saida: int | None = None,
+    modelo: str | None = None,
+    prompt_versao: str | None = None,
 ) -> None:
-    """Espelha no banco exatamente o que o lead recebeu."""
+    """Espelha no banco exatamente o que o lead recebeu.
+
+    Os tokens vão junto porque é aqui que se descobre o custo por clínica — o
+    número que decide se o plano fixo fecha. O relatório da OpenAI agrupa por
+    projeto e não sabe de qual clínica veio a conversa.
+
+    A resposta é dividida em balões e cada um vira uma linha; o consumo é do
+    turno inteiro, então só o PRIMEIRO balão carrega os tokens. Somar o mesmo
+    consumo em cada balão multiplicaria o custo por três no relatório.
+    """
     try:
         supabase_client.table("messages").insert({
             "clinic_id": clinic_id,
@@ -293,6 +332,10 @@ def registrar_saida(
             "wa_message_id": wa_message_id,
             "template_name": template_name,
             "categoria_cobranca": categoria_cobranca,
+            "tokens_entrada": tokens_entrada,
+            "tokens_saida": tokens_saida,
+            "modelo": modelo,
+            "prompt_versao": prompt_versao,
         }).execute()
     except Exception as exc:
         logging.warning("Falha ao registrar mensagem enviada: %s", exc)

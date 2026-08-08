@@ -11,6 +11,7 @@ caro que essa automação pode cometer.
 """
 from typing import Any
 
+from ..config import settings
 from ..services import agenda, llm
 from .base import (
     APRESENTACAO_CONTINUA,
@@ -20,6 +21,9 @@ from .base import (
     montar_contexto,
     montar_tom,
 )
+
+# Ver comentário em sdr.py: suba ao mudar qualquer bloco de texto deste arquivo.
+VERSAO = "agendador-v1"
 
 MISSAO = """# SUA MISSÃO AGORA (agente de Agendamento)
 A pessoa já foi qualificada. Seu objetivo é fechar o horário.
@@ -132,16 +136,26 @@ async def responder(ctx: dict[str, Any]) -> Resposta | None:
     if briefing.get("politica_cancelamento"):
         blocos.append(f"# CANCELAMENTO\n{briefing['politica_cancelamento']}")
 
-    texto, chamadas = await llm.conversar(
+    resultado = await llm.conversar(
         system="\n\n".join(b for b in blocos if b and b.strip()),
         mensagem=ctx["mensagem"],
         historico=ctx.get("historico"),
         ferramentas=[FERRAMENTA_RESERVAR, FERRAMENTA_SEM_HORARIO],
         executar_ferramenta=executar,
         apresentar=apresentar,
+        # Modelo econômico: este agente escolhe dentro de uma lista fechada e
+        # chama uma ferramenta. Modelo melhor aqui não melhora nada — ele já só
+        # copia o horário que recebeu.
+        modelo=settings.MODEL_AGENDADOR,
     )
 
-    resposta = Resposta(texto=texto)
+    resposta = Resposta(
+        texto=resultado.texto,
+        tokens_entrada=resultado.consumo.tokens_entrada,
+        tokens_saida=resultado.consumo.tokens_saida,
+        modelo=resultado.consumo.modelo,
+        prompt_versao=VERSAO,
+    )
 
     if resultado_reserva.get("ok"):
         resposta.proximo_estagio = "agendado"
