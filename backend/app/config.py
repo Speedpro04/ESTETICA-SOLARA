@@ -2,10 +2,18 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = BASE_DIR.parent.parent
+BASE_DIR = Path(__file__).resolve().parent      # backend/app
+BACKEND_DIR = BASE_DIR.parent                   # backend
+PROJECT_ROOT = BACKEND_DIR.parent               # raiz do repositório
 
+# Do mais geral para o mais específico — o último vence.
+#
+# `backend/.env` estava faltando nesta lista, e é justamente onde o arquivo
+# mora. Em produção não doía porque as variáveis vêm do painel de deploy; em
+# desenvolvimento, o arquivo estava preenchido e sendo ignorado em silêncio —
+# o pior tipo de erro de configuração, porque parece que a chave é que está errada.
 load_dotenv(PROJECT_ROOT / ".env")
+load_dotenv(BACKEND_DIR / ".env", override=True)
 load_dotenv(BASE_DIR / ".env", override=True)
 
 class Settings:
@@ -33,14 +41,23 @@ class Settings:
     ALGORITHM = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
 
-    # Evolution API
-    EVOLUTION_API_URL = os.getenv("EVOLUTION_API_URL", "http://localhost:8080")
-    EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "")
-    EVOLUTION_INSTANCE = os.getenv("EVOLUTION_INSTANCE", "")
+    # WhatsApp — Meta Cloud API (oficial)
+    # Um App da Meta atende todas as clínicas (modelo Tech Provider): o segredo e
+    # o verify token são globais, e o que distingue a clínica é o phone_number_id
+    # que chega no webhook.
+    META_APP_SECRET = os.getenv("META_APP_SECRET", "")
+    META_VERIFY_TOKEN = os.getenv("META_VERIFY_TOKEN", "")
+    META_GRAPH_VERSION = os.getenv("META_GRAPH_VERSION", "v23.0")
+    META_GRAPH_URL = os.getenv("META_GRAPH_URL", "https://graph.facebook.com")
+    # Token de System User usado para enviar. Por número, o valor real vem do
+    # gerenciador de segredos (wa_phone_numbers.access_token_ref); este é o
+    # padrão para a operação de número único.
+    META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "")
 
-    # Celery
-    CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/1")
-    CELERY_RESULT_URL = os.getenv("CELERY_RESULT_URL", "redis://localhost:6379/2")
+    # Rotinas periódicas (follow-up e timeout de handoff). Chamadas por agendador
+    # externo em /api/jobs/ciclo. Segredo obrigatório em produção: é um endpoint
+    # que gasta dinheiro — cada follow-up fora da janela de 24h é conversa paga.
+    JOBS_SECRET = os.getenv("JOBS_SECRET", "")
 
     # SSL/HTTPS
     SSL_CERTFILE = os.getenv("SSL_CERTFILE", "")
@@ -52,20 +69,53 @@ class Settings:
     BACKEND_PUBLIC_URL = os.getenv("BACKEND_PUBLIC_URL", "")
     EVOLUTION_WEBHOOK_SECRET = os.getenv("EVOLUTION_WEBHOOK_SECRET", "")
 
-    # Stripe
+    # --- Stripe -----------------------------------------------------------
+    # Só dois segredos. Os IDs de preço NÃO moram aqui: vivem em
+    # plans.stripe_price_id, no banco, para que o preço cobrado e o plano
+    # mostrado no painel não possam divergir — eram quatro variáveis de plano
+    # (básico/crescimento/avançado/enterprise) do produto antigo, e sobreviver
+    # a um repivot de preço com o valor espalhado em .env é como se cobra o
+    # cliente errado.
+    #
+    # O webhook secret é POR ENDPOINT. A conta é compartilhada com outro
+    # produto; o whsec do endpoint dele não valida os eventos daqui.
     STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-    
-    # Stripe Price IDs
-    STRIPE_PRICE_BASICO = os.getenv("STRIPE_PRICE_BASICO", "")
-    STRIPE_PRICE_CRESCIMENTO = os.getenv("STRIPE_PRICE_CRESCIMENTO", "")
-    STRIPE_PRICE_AVANCADO = os.getenv("STRIPE_PRICE_AVANCADO", "")
-    STRIPE_PRICE_ENTERPRISE = os.getenv("STRIPE_PRICE_ENTERPRISE", "")
 
-    # OpenAI AI (LLM principal)
+    # OpenAI ------------------------------------------------------------------
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+    # Chave reserva. NÃO existe para dividir carga: limite de requisições na
+    # OpenAI é por projeto, não por chave, então duas chaves no mesmo projeto
+    # dividem o mesmo balde. Ela existe para o dia em que a principal for
+    # revogada, estourar cota ou cair por problema de cobrança — aí o
+    # atendimento continua em vez de parar.
+    OPENAI_API_KEY_RESERVA = os.getenv("OPENAI_API_KEY_RESERVA", "")
+
     OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+
+    # Modelo por agente. A chave não influencia em nada o que o modelo lê — quem
+    # define comportamento é o prompt. O que muda qualidade de verdade é ISTO.
+    #
+    # SDR ganha o modelo melhor porque é onde o modelo realmente trabalha:
+    # conversa aberta, com medo, objeção e nuance. Os outros não precisam:
+    #   Agendador  recebe lista fechada de horários e chama uma ferramenta; as
+    #              travas estão no código e no banco, não no julgamento dele.
+    #   Follow-up  escolhe template e dispara.
+    #   Handoff    quase não usa modelo — a detecção é determinística, por
+    #              palavra-chave, antes de a mensagem chegar no LLM.
     MODEL_LLM = os.getenv("OPENAI_MODEL", "gpt-5-mini")
+    MODEL_SDR = os.getenv("OPENAI_MODEL_SDR", "gpt-5")
+    MODEL_AGENDADOR = os.getenv("OPENAI_MODEL_AGENDADOR", "") or MODEL_LLM
+    MODEL_FOLLOWUP = os.getenv("OPENAI_MODEL_FOLLOWUP", "") or MODEL_LLM
+
+    @classmethod
+    def modelo_do_agente(cls, agente: str | None) -> str:
+        """Qual modelo atende este agente. Desconhecido cai no padrão."""
+        return {
+            "sdr": cls.MODEL_SDR,
+            "agendador": cls.MODEL_AGENDADOR,
+            "follow_up": cls.MODEL_FOLLOWUP,
+        }.get(agente or "", cls.MODEL_LLM)
 
     # Maintenance / Dev Pass
     ENABLE_DEV_PASS = os.getenv("ENABLE_DEV_PASS", "false").lower() == "true"

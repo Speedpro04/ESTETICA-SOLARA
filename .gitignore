@@ -47,3 +47,7 @@ ESTETICA-SOLARA.txt
 
 # Pasta temporaria do vite-react-ssg (gerada a cada build)
 .vite-react-ssg-temp
+
+# Skills instaladas via "npx skills add" — dependencia, nao codigo do projeto.
+# O skills-lock.json fica versionado para permitir reinstalar.
+.agents/

@@ -1,240 +1,303 @@
-# PRD — Solara Medical Connect
+# PRD — Solara Connect
 ### Product Requirements Document
-**Versão:** 2.0
-**Data:** 31/05/2026
+**Versão:** 3.0
+**Data:** 07/08/2026
 **Autor:** Axos Hub
-**E-mail operacional:** axoshub.solara@gmail.com
-**Status:** ✅ Em produção (deploy via EasyPanel)
+**Status:** 🔧 Reconstruído — backend e banco novos aplicados; canal WhatsApp aguardando número verificado na Meta
+
+> **v3 é uma reescrita, não uma revisão.** A v2 descrevia o "Solara Medical
+> Connect": clínica médica genérica, Evolution API por QR Code, quatro planos e
+> marketplace de parceiros. Nada disso existe mais. O banco foi zerado e
+> reconstruído em 07/08/2026, e a Evolution foi removida por completo.
 
 ---
 
-## 1. Visão Geral do Produto
+## 1. O produto
 
-O **Solara Medical Connect** é uma plataforma SaaS de gestão e atendimento digital para **clínicas médicas, consultórios e hospitais**. O sistema automatiza o fluxo desde a captação e atendimento do paciente até a conclusão da consulta, com uma **IA gestora (Solara)** no centro do atendimento, agendamento inteligente e um marketplace de parceiros monetizado.
+**Solara Connect** é atendimento e agendamento por agentes de IA no WhatsApp, para
+**clínicas de estética avançada e cirurgia plástica**. Não é gestão de clínica, não
+é prontuário, não é marketplace. Duas coisas, bem feitas: **atender e agendar.**
 
-### 1.1 Proposta de Valor
-- **Para clínicas:** atendimento 24/7 via IA, redução de tempo de espera, gestão visual de atendimentos, agendamento inteligente e uma fonte extra de valor (marketplace de fornecedores).
-- **Para médicos:** prontuário unificado, controle de salas, menos tempo perdido com recados.
-- **Para pacientes:** atendimento imediato via WhatsApp, sem filas, com acolhimento e clareza.
+### 1.1 A proposta de valor é tempo
 
-### 1.2 Diferencial Central — A Solara IA
-A **Solara** é o cérebro do sistema: uma gestora virtual de atendimento que acolhe, agenda, confirma, remarca, tira dúvidas e converte leads — com **dados reais da clínica** e **sem inventar informações**. É o que separa o Solara de um "sistema bonito" de uma plataforma inteligente.
+O público dessas clínicas tem dinheiro e não tem tempo. O que se vende não é preço
+nem "atendimento humanizado" — é **não esperar, não repetir, não voltar amanhã para
+saber um horário**.
 
-### 1.3 Público-Alvo
-| Segmento | Perfil |
-|----------|--------|
-| Primário | Clínicas médicas/odontológicas de 2 a 20 especialistas |
-| Secundário | Consultórios individuais em expansão |
-| Terciário | Redes e franquias de saúde |
+Isso não é slogan: é a especificação do comportamento dos agentes e a métrica que
+o painel mostra primeiro (tempo até a primeira resposta, % em até 1 minuto, %
+atendido fora do expediente).
+
+### 1.2 Consequências de projeto
+
+| Decisão | Por quê |
+|---|---|
+| A IA não informa preço no WhatsApp (padrão) | Número solto vira comparação; comparação é perda de tempo dos dois lados |
+| Máximo 2 perguntas antes de oferecer horário | Cada pergunta é uma chance a mais de a pessoa sumir. O resto a equipe descobre na avaliação |
+| 1 tentativa de insistência, não 2 | Com esse público, a segunda cobrança queima em vez de recuperar |
+| Handoff assumido em 5 minutos | "Chamei a doutora, ela responde em 5 min" é o serviço, não a falha da IA |
+| O Agendador oferece horário real, nunca "vou verificar" | "Vou te retornar" custa um dia da paciente |
 
 ---
 
-## 2. Arquitetura Técnica
+## 2. O time de agentes
 
-### 2.1 Stack de Tecnologia
+Quatro papéis lógicos atrás de **um número por clínica**. A pessoa nunca percebe a
+troca — a resolução de qual agente responde é o `stage` da conversa.
+
+| Agente | Entra quando | Faz | Sai quando |
+|---|---|---|---|
+| **SDR** | Primeiro contato | Entende o interesse, contorna objeção autorizada, conduz ao próximo passo | Lead quer marcar → Agendador |
+| **Agendador** | Lead qualificado | Propõe horário **real** e reserva | Confirmado |
+| **Handoff** | Regra determinística, pedido explícito, ou assunto fora do briefing | **Trava a IA** e chama a equipe | Humano assume, ou timeout devolve |
+| **Follow-up** | Lead parado na régua | Reengaja (texto livre dentro de 24h; template aprovado fora) | Lead responde → volta ao ponto onde parou |
+
+**Handoff não é agente conversacional** — é um estado que silencia os outros.
+**Follow-up não é estágio** — é gatilho + template, e não move a conversa de lugar.
+
+Decidido em 07/08/2026: **só esses quatro.** Um quinto agente voltado para dentro
+(copiloto da recepcionista) foi avaliado e descartado — copiloto de dashboard não
+muda decisão nenhuma. O único pedaço que valia — avisar quando o handoff estoura o
+prazo — é notificação, não IA.
+
+### 2.1 Anti-alucinação de horário — três camadas
+
+A camada de baixo não depende de nenhuma acima:
+
+1. **Prompt** — o Agendador só vê uma lista fechada de vagas reais
+2. **Ferramenta** — `reservar_horario` rejeita qualquer horário fora dessa lista
+3. **Banco** — `trg_appointments_valida_horario` recusa gravar fora do expediente,
+   venha de onde vier
+
+A válvula de escape é assimétrica de propósito: `forcado_por_humano` deixa a
+recepção encaixar alguém no domingo; a IA nunca preenche esse campo.
+
+### 2.2 Escalonamento — determinístico antes do modelo
+
+Contraindicação, complicação, gestante, ameaça judicial e pedido de humano casam
+por **texto normalizado** (`escalation_rules`) **antes** de a mensagem chegar ao
+LLM. Risco clínico não pode depender do julgamento do modelo naquele turno.
+
+Seis regras globais (`clinic_id IS NULL`) valem para toda clínica e não são
+editáveis pelo cliente — é o piso de segurança do contrato. A clínica acrescenta
+as suas.
+
+---
+
+## 3. Arquitetura
+
+### 3.1 Stack
+
 | Camada | Tecnologia |
-|--------|-----------|
-| **Frontend** | React 18 + TypeScript + Vite |
-| **Animações** | Framer Motion |
-| **Ícones** | Lucide React |
-| **Estilização** | CSS Vanilla (Design System próprio) |
-| **Backend** | FastAPI (Python) + Celery + Redis |
-| **IA / LLM** | **OpenAI `gpt-5-mini`** (reasoning_effort low) |
-| **WhatsApp** | Evolution API |
-| **Autenticação** | Supabase Auth (JWT) |
-| **Banco de Dados** | PostgreSQL (Supabase) |
-| **Pagamentos** | Stripe (Payment Links + Webhooks) |
-| **E-mail** | SMTP Gmail (axoshub.solara@gmail.com) |
-| **Hospedagem** | EasyPanel (frontend + backend) + Supabase |
+|---|---|
+| Frontend | React 18 + TypeScript + Vite |
+| Backend | FastAPI (Python) |
+| LLM | OpenAI, `reasoning_effort: low` (chat em tempo real) |
+| WhatsApp | **Meta Cloud API** (oficial) |
+| Banco / Auth | Supabase (PostgreSQL 17 + GoTrue) |
+| Pagamentos | Stripe |
+| Rotinas periódicas | Endpoint `/api/jobs/ciclo` + agendador externo |
 
-### 2.2 Credenciais do Projeto
-| Serviço | Referência |
-|---------|-----------|
-| Supabase Project ID | `mvqkelauwscxdwnzevtz` ("App-Solara-Connect-Oficial") |
-| App (frontend) | `https://app.solaraconnect.online` |
-| API (backend) | `https://solaraconnect.online` |
-| Evolution API | `https://evoapi.axoshub.com` |
-| Stripe | Modo Test (Payment Links ativos) |
-| Repositório | `github.com/Speedpro04/SOLARA-OFICIAL` |
+**Sem Celery e sem Redis.** O estado das rotinas já vive no banco
+(`next_follow_up_at`, `handoff_aberto_em`); uma query com `WHERE` resolve o que um
+broker resolveria, sem mais um processo para monitorar e pagar.
 
-> 🔒 Segredos (OpenAI, Stripe, Supabase Service Role) ficam **só no EasyPanel** — nunca no Git.
+### 3.2 Backend
 
-### 2.3 Estrutura de Arquivos
 ```
-src/                              # Frontend React
-├── lib/{supabase.ts, auth.ts}
-├── App.tsx                        # Router (state-based) + lazy load
-├── LandingPage.tsx                # Página de vendas + planos
-├── LoginPage / RegisterPage
-├── CheckoutPage.tsx               # Redireciona ao Stripe Payment Link
-├── Dashboard.tsx                  # Painel + chat da Solara IA
-├── PartnersPage.tsx               # Marketplace de parceiros
-├── PartnersAnalytics.tsx          # Relatório de cliques (monetização)
-└── Logo.tsx
-
-backend/app/                       # Backend FastAPI
-├── main.py / config.py
-├── api/{ai.py, stripe.py, whatsapp.py, evolution.py}
-├── services/{ai_service.py, supabase_service.py}
-├── tasks.py / celery_app.py       # Filas assíncronas
-└── solara_agent.py
-
-SOLARA_PARTNERS_SETUP.sql          # Tabelas de cliques (monetização)
-SOLARA_PROJECT_GUIDE.md            # Guia técnico do projeto
-RELATORIO-MELHORIAS-SOLARA.md      # Changelog de evolução
+backend/app/
+├── api/
+│   ├── meta_webhook.py       Recebe da Meta: HMAC sobre o corpo cru, 200 imediato
+│   ├── jobs.py               /api/jobs/ciclo — follow-up + timeout de handoff
+│   ├── stripe.py             Assinaturas
+│   └── ai.py                 Chat do painel
+├── agents/
+│   ├── router.py             Registro → trava → regra determinística → agente
+│   ├── base.py               Identidade da Solara + contexto da clínica
+│   ├── sdr.py
+│   ├── agendador.py
+│   └── followup.py
+└── services/
+    ├── whatsapp_cloud.py     Envio: texto, template, balões
+    ├── conversation.py       Estado, contexto, escalonamento
+    ├── agenda.py             Cálculo de vagas reais
+    ├── llm.py                Chamada ao modelo + rede anti-reapresentação
+    └── supabase_service.py
 ```
 
----
+**A ordem das checagens no roteador é a segurança**, não estilo: registro e
+idempotência → trava de atendimento → **regra determinística** → agente. Inverter
+as duas últimas significaria deixar o LLM decidir se uma pergunta sobre reação
+adversa merece resposta automática.
 
-## 3. Solara IA — Gestora de Atendimento (cérebro do sistema)
+### 3.3 Frontend
 
-### 3.1 Papel
-Gestora virtual que recebe, acolhe, organiza, argumenta e conduz o próximo passo — vendendo valor sem pressionar e convertendo interesse em agendamento.
+```
+src/
+├── Painel.tsx                Atendimento: tempo, funil, filas, leads
+├── Briefing.tsx              9 seções, salvamento por seção
+├── Operacional.tsx           Casca (Atendimento | Briefing)
+├── painel/componentes.tsx
+├── briefing/campos.tsx
+└── lib/{painel.ts, briefing.ts, auth.ts, supabase.ts}
+```
 
-### 3.2 Capacidades
-- Agendamentos, remarcações, confirmações e cancelamentos
-- Coleta estruturada de dados (nome, telefone, especialidade, data, particular/convênio)
-- Qualificação e conversão de novos pacientes
-- Escalonamento de urgência clínica e transferência para humano
+Removidos na v3: `Dashboard.tsx` (2.321 linhas de clínica médica),
+`PartnersPage.tsx` e `PartnersAnalytics.tsx` (marketplace descontinuado).
 
-### 3.3 Contexto Dinâmico
-A cada conversa, o backend injeta no prompt os **dados reais da clínica** (nome, telefone, e-mail, endereço, profissionais), carregados via `clinic_id` do Supabase.
+### 3.4 Banco
 
-### 3.4 Guardrails (confiança)
-- **Nunca** inventa preço, horário, disponibilidade, profissional, convênio ou endereço.
-- Usa apenas os dados injetados; sem o dado → pergunta ou encaminha à equipe.
-- Não dá diagnóstico, prescrição ou interpretação de exame.
+Projeto Supabase `szssizgchukffmmcjxoh`. Schema em `supabase/schema_v2/`,
+aplicado na ordem `00_reset` → `13_tempo_e_posicionamento`.
 
-### 3.5 Configuração técnica
-- Modelo: `gpt-5-mini` · `temperature 0.4` · `max_tokens 1024` · `reasoning_effort: low`
-- Prompt-mestre: `backend/app/services/ai_service.py`
-- Playbook: `SOLARA_AI_PLAYBOOK.md`
-- Endpoint: `POST /api/ai/chat` (com **rate-limit** de 20 req/min por IP)
+Entidades centrais:
 
----
+| Tabela | Papel |
+|---|---|
+| `conversations` | **É o lead** — funil, máquina de estados e janela de 24h no mesmo lugar |
+| `conversation_transitions` | Histórico append-only de quem passou a bola para quem, e por quê |
+| `stage_transition_rules` | O grafo de transições permitidas, em tabela (inspecionável) |
+| `procedures` | Catálogo com apelidos — é por "botox" que o SDR reconhece o interesse |
+| `clinic_hours` / `clinic_schedule_blocks` | Expediente estruturado; base da trava anti-alucinação |
+| `clinic_briefing` | 60+ colunas: o que ensina o SDR a vender |
+| `escalation_rules` | Camada determinística do handoff |
+| `wa_phone_numbers` | Resolução de tenant pelo `phone_number_id` |
+| `patients` | Só quem virou cliente — interessado é conversa, não paciente |
 
-## 4. Modelo de Negócio — Planos
-
-### 4.1 Tabela de Preços (Stripe Payment Links)
-| Plano | Especialistas | Preço/mês | Slug |
-|-------|--------------|-----------|------|
-| **Básico** | Até 2 | R$ 197,00 | `basico` |
-| **Crescimento** | 3 a 5 | R$ 397,00 | `crescimento` |
-| **Avançado** ⭐ | 6 a 9 | R$ 597,00 | `avancado` |
-| **Enterprise** | 10+ | R$ 897,00 | `enterprise` |
-
-> O plano **Avançado** é destacado como "Mais Escolhido" na Landing Page.
-> Cada plano aponta para um **Stripe Payment Link**; o `clinic_id` é enviado via
-> `client_reference_id` para o webhook vincular a assinatura à clínica.
-
-### 4.2 Dupla Receita
-1. **Assinaturas** das clínicas (recorrente)
-2. **Marketplace de parceiros** — monetização de fornecedores por exposição/cliques
+**Não existe tabela `leads`.** A conversa *é* o lead; duas entidades 1:1 seriam
+gordura.
 
 ---
 
-## 5. Schema do Banco de Dados
+## 4. Multi-tenant e segurança
 
-### 5.1 Tabelas principais
-| Tabela | Descrição | RLS |
-|--------|-----------|-----|
-| `plans` | Planos de assinatura | SELECT público |
-| `clinics` | Clínicas (name, email, phone, address...) | Isolamento por `owner_auth_id` |
-| `users` | Staff da clínica | Isolamento por `clinic_id` |
-| `specialists` | Profissionais da clínica | Isolamento por `clinic_id` |
-| `patients` | Pacientes | Isolamento por `clinic_id` |
-| `appointments` | Agendamentos | Isolamento por `clinic_id` |
-| `subscriptions` | Assinaturas Stripe | Acesso por owner |
-| `onboarding_tokens` | Senhas provisórias | Acesso por e-mail |
-| `email_logs` | E-mails enviados | Acesso por owner |
-| `whatsapp_messages` | Mensagens WhatsApp | Isolamento por `clinic_id` |
-| `solara_partners_clicks` | Cliques de parceiros (monetização) — `clinic_id TEXT` | Inserção/leitura pública |
+RLS habilitado nas 22 tabelas, todas as políticas `TO authenticated`, resolvidas
+por `current_clinic_ids()` (SECURITY DEFINER, `search_path = ''`) para não recursar
+entre `clinics` e `users`.
 
----
+**Isolamento verificado por teste de invasão em 07/08/2026:** segunda clínica
+semeada, tentativas de leitura e escrita cruzada a partir de uma sessão real.
+Leitura filtrada, escrita rejeitada (403 ou 0 linhas), assinatura não
+auto-promovível.
 
-## 6. Fluxos do Usuário
+O teste encontrou **uma vulnerabilidade real, reproduzida e corrigida**
+(`12_rls_correcao_tenant.sql`): a política de INSERT em `users`, herdada do schema
+antigo, era `WITH CHECK (auth.uid() IS NOT NULL)` — qualquer conta nova podia se
+inserir em qualquer clínica e ler tudo. Havia uma segunda porta pelo UPDATE sem
+`WITH CHECK`.
 
-### 6.1 Onboarding (Novo Cliente)
-1. Landing Page → escolhe plano → cadastro (clínica, e-mail, senha)
-2. Sistema cria auth.user, clinic, user (owner), subscription (pending)
-3. Checkout → **Stripe Payment Link** (com `client_reference_id`)
-4. Webhook `checkout.session.completed` → ativa assinatura da clínica
-5. Acesso liberado ao Dashboard (após `hasActiveSubscription`)
+> **Regra que fica:** em RLS, todo UPDATE precisa de `USING` **e** `WITH CHECK`.
+> `USING` diz o que você pode tocar; `WITH CHECK` diz no que aquilo pode se
+> transformar. Constraint de unicidade não é política de segurança.
 
-### 6.2 Atendimento via Solara
-1. Paciente envia mensagem (Dashboard ou WhatsApp/Evolution)
-2. `POST /api/ai/chat` com `clinic_id` → carrega contexto da clínica
-3. Solara responde com guardrails e conduz o próximo passo
+Outras travas:
+- `phone_number_id` único, **sem fallback** por telefone do paciente — adivinhar
+  tenant é vazamento entre clínicas
+- Índice único parcial em `messages.wa_message_id` — reentrega da Meta não vira
+  resposta duplicada
+- Views com `security_invoker = true` — sem isso rodariam como dono e ignorariam RLS
+- Assinatura só leitura no navegador; escrita é do webhook Stripe
+- `wa_phone_numbers` guarda **referência** de segredo, nunca o token
 
-### 6.3 Marketplace / Monetização
-1. Clínica acessa aba Parceiros → 70 fornecedores reais em 13 categorias
-2. Clique em "Acessar Site" → grava em `solara_partners_clicks`
-3. Relatório "Performance de Parceiros" consolida cliques (exporta PDF)
+**Risco conhecido:** o backend usa `service_role`, que ignora RLS. Um bug lá cruza
+tenant e o banco não segura. Mitigação de desenho: `clinic_id` sempre sai do
+`phone_number_id`, nunca de entrada do usuário.
 
 ---
 
-## 7. Segurança
+## 5. Painel operacional
 
-- **RLS** habilitado em todas as tabelas (isolamento por `clinic_id`)
-- **Rate-limit** no endpoint da IA (20 req/min por IP) — protege a cota OpenAI
-- Segredos fora do Git (`.gitignore`) — só no EasyPanel
-- Endpoints de pagamento validam owner; webhook com verificação de assinatura Stripe
-- Auth via Supabase (JWT auto-refresh, sessão persistida)
-- **LGPD:** dados isolados por clínica · **HIPAA-ready:** criptografia em trânsito/repouso
+Ordem da tela é ordem de urgência:
 
----
+1. **Esperando a equipe** — só aparece quando há alguém na fila
+2. **Tempo de espera** — a prova do que a clínica compra
+3. **Números do período**
+4. **Funil de coorte** — dos leads que entraram, quantos chegaram a cada etapa
+5. **Reengajamento** — quem vai ser reprocurado, com aviso de conversa paga
+6. **Origem e procedimentos**
+7. **Lista de leads** classificados
 
-## 8. Integrações
+**O funil é de coorte, não de ocupação.** Contar quem está em cada estágio agora
+faz o topo parecer vazio justamente na clínica que converte bem — quem avançou não
+está mais lá. A coorte usa o histórico de transições.
 
-### 8.1 OpenAI (IA) — ✅ produção
-- Modelo `gpt-5-mini`, validado em produção. Ver seção 3.
-
-### 8.2 Stripe (Pagamentos) — ✅ produção
-- Payment Links nos 4 planos + webhook vinculando assinatura à clínica.
-
-### 8.3 WhatsApp (Evolution API) — ✅ implementado
-- Base: `https://evoapi.axoshub.com` · instância `axos-evoapi`.
-
-### 8.4 Marketplace de Parceiros (Monetização) — ✅ produção
-- 70 fornecedores reais (links verificados) em 13 categorias, incluindo Regional Vale do Paraíba.
-- Rastreio de cliques assíncrono + relatório consolidado com exportação PDF.
+O card de tempo usa **mediana, não média**: uma conversa esquecida por 10 horas
+distorce a média e o número deixa de descrever o atendimento típico.
 
 ---
 
-## 9. Roadmap
+## 6. Briefing — a alavanca de receita
 
-### ✅ Entregue (v1 → v2)
-- [x] Landing, Login, Cadastro, Checkout, Dashboard
-- [x] Backend FastAPI + Celery + Supabase
-- [x] **Solara IA Manager** (contexto dinâmico + guardrails)
-- [x] Migração para OpenAI `gpt-5-mini`
-- [x] Pagamentos reais (Stripe Payment Links + webhook)
-- [x] WhatsApp (Evolution API)
-- [x] Marketplace B2B com 70 parceiros + contagem de cliques + analytics
-- [x] Segurança (rate-limit, RLS) e performance (code-splitting)
-- [x] Deploy em produção (EasyPanel) — 31/05/2026
+Nove seções, salvamento por seção, dica em cada campo explicando o que a Solara faz
+com aquilo.
 
-### 🔜 Próximos
-- [ ] **RAG + Embeddings (pgvector)** — Solara responde por documentos reais da clínica
-- [ ] **Sistema de vendas automático** (FastAPI + Celery + Evolution + LLM)
-- [ ] Cadastro guiado dos dados da clínica (alimenta o contexto da IA)
-- [ ] Kanban/agenda visual, prontuário eletrônico, NPS automático
-- [ ] Testes automatizados
-- [ ] Otimização da LandingPage (imagens base64 → arquivos)
+**É o briefing que decide se o SDR converte 20% ou 40%.** Uma clínica que converte
+40% renova; uma que converte 20% culpa a IA e cancela. Nenhum agente novo conserta
+isso — só briefing bem preenchido.
+
+Por isso o formulário mostra progresso por seção (`3/4`) e o painel lista o que
+falta antes de a Solara poder atender (`clinica_pronta()`): expediente,
+procedimentos, briefing, número conectado, destinatário de handoff.
+
+`posicionamento` (`alto_padrao` | `volume`) é a chave mestra: troca tom,
+agressividade e régua de uma vez. Antes eram seis campos soltos que precisavam
+apontar na mesma direção.
 
 ---
 
-## 10. Métricas de Sucesso
-| Métrica | Meta |
-|---------|------|
-| Tempo de cadastro até dashboard | < 3 minutos |
-| Taxa de conversão LP → Cadastro | > 5% |
-| Taxa de resposta da Solara | > 95% |
-| Uptime do sistema | > 99.5% |
-| NPS dos médicos | > 70 |
-| Churn mensal | < 5% |
+## 7. Modelo de negócio
+
+Plano único, cobrança mensal ou anual, **3 especialistas inclusos** (limite no
+banco, via trigger — checagem em JavaScript é contornada pelo console).
+Trial de 10 dias.
+
+Preço e condições vivem na tabela `plans`.
+
+**Custo variável que decide a margem:** cada conversa iniciada fora da janela de
+24h é cobrada pela Meta, e `marketing` custa mais que `utility`. Daí o teto de
+tentativas de follow-up, a janela de silêncio e o aviso de "conversa paga" no
+painel antes de o envio acontecer.
+
+---
+
+## 8. Estado atual
+
+### Pronto e verificado
+- Schema completo aplicado (14 arquivos)
+- Os 4 agentes escritos
+- Trava anti-alucinação de horário — 5 casos testados
+- Timeout de handoff e régua de follow-up — 7 casos testados
+- Painel e briefing rodando, com login real e dados semeados
+- Isolamento multi-tenant testado, uma vulnerabilidade corrigida
+
+### Parado esperando a Meta
+`meta_webhook.py` e `whatsapp_cloud.py` estão escritos e desligados. Faltam
+`META_APP_SECRET` e `META_VERIFY_TOKEN` — sem eles o webhook recusa tudo em
+produção, de propósito.
+
+**Este é o caminho crítico do projeto.** Verificação de Business Manager leva dias,
+e nada do canal pode ser testado de ponta a ponta antes disso.
+
+### Não construído
+- Entrega do alerta de handoff por WhatsApp interno e e-mail (o canal `painel`
+  funciona porque a fila está visível)
+- Rate limit no webhook
+- Testes automatizados
+
+---
+
+## 9. Métricas
+
+| Métrica | Meta | Por quê |
+|---|---|---|
+| Primeira resposta (mediana) | < 30 s | É a proposta de valor |
+| Respondidas em até 1 min | > 90% | Idem |
+| Handoff assumido no prazo | > 90% | Onde o produto mais falha feio |
+| Taxa de agendamento | > 30% | O que a clínica compra |
+| Briefing preenchido no onboarding | > 80% | Prediz a taxa acima |
+| Churn mensal | < 5% | |
 
 ---
 
 > **Documento confidencial.** Propriedade intelectual da Axos Hub.
-> Última atualização: 31/05/2026 (v2.0)
+> Última atualização: 07/08/2026 (v3.0)
