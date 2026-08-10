@@ -4,11 +4,12 @@ import { CreditCard, CheckCircle2, ArrowLeft, MailCheck, LockKeyhole, Lock, Aler
 import { LogoMarca } from './Logo';
 import { authColors } from './brand/tokens';
 import { useViewport } from './lib/useViewport';
+import { criarCheckout } from './lib/billing';
 
 interface CheckoutPageProps {
   planName: string;
   planPrice: string;
-  priceId: string;
+  planSlug: string;
   clinicId: string;
   userEmail: string;
   onPaymentSuccess: () => void;
@@ -16,16 +17,7 @@ interface CheckoutPageProps {
   onDevPass?: () => void;
 }
 
-// Mapa de Payment Links do Stripe por valor do plano.
-// O clinic_id vai em client_reference_id e o e-mail em prefilled_email,
-// para o webhook do Stripe vincular a assinatura à clínica correta.
-// Plano único: R$497 no mensal, R$397/mês no anual (cobrado uma vez por ano).
-const STRIPE_PAYMENT_LINKS: Record<string, string> = {
-  '497': import.meta.env.VITE_STRIPE_LINK_MENSAL || '',
-  '397': import.meta.env.VITE_STRIPE_LINK_ANUAL || '',
-};
-
-const CheckoutPage: React.FC<CheckoutPageProps> = ({ planName, planPrice, priceId: _priceId, clinicId, userEmail, onPaymentSuccess: _onPaymentSuccess, onBack, onDevPass: _onDevPass }) => {
+const CheckoutPage: React.FC<CheckoutPageProps> = ({ planName, planPrice, planSlug, clinicId, userEmail, onPaymentSuccess: _onPaymentSuccess, onBack, onDevPass: _onDevPass }) => {
   const { isMobile, isTablet } = useViewport();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess] = useState(false);
@@ -39,21 +31,15 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ planName, planPrice, priceI
     setIsProcessing(true);
 
     try {
-      const baseLink = STRIPE_PAYMENT_LINKS[planPrice];
-      if (!baseLink) {
-        throw new Error('Link de pagamento Stripe não configurado para este plano');
-      }
       if (!clinicId) {
-        throw new Error('Clínica não identificada. Refaça o cadastro.');
+        throw new Error('Clínica não identificada. Entre de novo.');
       }
 
-      // Anexa client_reference_id (clinic_id) e prefilled_email para o webhook
-      // do Stripe conseguir vincular a assinatura à clínica correta.
-      const params = new URLSearchParams({
-        client_reference_id: clinicId,
-        prefilled_email: userEmail,
-      });
-      window.location.href = `${baseLink}?${params.toString()}`;
+      // O backend confere no banco que quem está logado é dono desta clínica,
+      // resolve o preço do plano e cria a sessão. A URL que volta já vem
+      // assinada pelo Stripe e vale por poucas horas.
+      const url = await criarCheckout(planSlug);
+      window.location.href = url;
     } catch (err: any) {
       setError(err.message || 'Erro ao processar pagamento.');
       setIsProcessing(false);

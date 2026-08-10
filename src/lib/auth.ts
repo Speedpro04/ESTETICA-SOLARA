@@ -230,33 +230,11 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
   return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
 }
 
-// =============================================
-// ATIVAR ASSINATURA (após pagamento)
-// =============================================
-export async function activateSubscription(clinicId: string, stripePaymentIntentId?: string): Promise<void> {
-  const now = new Date();
-  const periodEnd = new Date(now);
-  periodEnd.setMonth(periodEnd.getMonth() + 1);
-
-  const { error } = await supabase
-    .from('subscriptions')
-    .update({
-      status: 'active',
-      stripe_payment_intent_id: stripePaymentIntentId || null,
-      current_period_start: now.toISOString(),
-      current_period_end: periodEnd.toISOString()
-    })
-    .eq('clinic_id', clinicId)
-    .eq('status', 'pending');
-
-  if (error) throw new Error(`Erro ao ativar assinatura: ${error.message}`);
-
-  // Marcar onboarding como concluído
-  await supabase
-    .from('clinics')
-    .update({ onboarding_completed: true })
-    .eq('id', clinicId);
-}
+// Não existe mais um activateSubscription() aqui. Ele escrevia status='active'
+// direto de dentro do navegador — e nem funcionava: o RLS de `subscriptions`
+// só permite SELECT para `authenticated`, então o UPDATE saía sem erro e sem
+// efeito. Quem ativa assinatura é o webhook do Stripe, com a service_role.
+// Ver src/lib/billing.ts para abrir o checkout.
 
 // =============================================
 // REGISTRAR ENVIO DE E-MAIL

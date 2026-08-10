@@ -15,11 +15,13 @@ import './index.css';
 
 type ViewState = 'landing' | 'login' | 'register' | 'checkout' | 'dashboard';
 
+// Sem priceId: o identificador de preço do Stripe saiu do bundle. O checkout
+// manda o slug e o backend resolve o preço em plans.stripe_price_id — assim o
+// que a página promete e o que a fatura cobra não têm como divergir.
 interface SelectedPlan {
   name: string;
   price: string;
   slug: string;
-  priceId: string;
 }
 
 function LazyFallback({ label }: { label: string }) {
@@ -51,8 +53,7 @@ function App() {
   const [selectedPlan, setSelectedPlan] = useState<SelectedPlan>({
     name: 'Solara Estética — Anual',
     price: '397',
-    slug: 'solara-anual',
-    priceId: import.meta.env.VITE_STRIPE_PRICE_ANUAL || ''
+    slug: 'solara-anual'
   });
   const [clinicId, setClinicId] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -130,8 +131,8 @@ function App() {
     setView('dashboard');
   };
 
-  const handleNavigateToRegister = (name: string, price: string, slug: string, priceId: string) => {
-    setSelectedPlan({ name, price, slug, priceId });
+  const handleNavigateToRegister = (name: string, price: string, slug: string) => {
+    setSelectedPlan({ name, price, slug });
     setView('register');
   };
 
@@ -211,7 +212,7 @@ function App() {
           <CheckoutPage
             planName={selectedPlan.name}
             planPrice={selectedPlan.price}
-            priceId={selectedPlan.priceId}
+            planSlug={selectedPlan.slug}
             clinicId={clinicId}
             userEmail={userEmail}
             onBack={() => setView('register')}

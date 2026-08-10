@@ -7,7 +7,7 @@ import { useViewport } from './lib/useViewport';
 
 interface LandingPageProps {
   onNavigateToLogin: () => void;
-  onNavigateToRegister: (planName: string, planPrice: string, planSlug: string, priceId: string) => void;
+  onNavigateToRegister: (planName: string, planPrice: string, planSlug: string) => void;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigateToRegister }) => {
@@ -19,21 +19,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
   const { isMobile, isTablet } = useViewport();
 
   // Plano único (decisão de negócio): R$497/mês, R$397/mês no anual.
-  // O preço é a chave que o CheckoutPage usa para achar o Payment Link do Stripe.
+  // `price` aqui é só o que a página mostra. Quem manda no valor cobrado é o
+  // stripe_price_id guardado no banco, resolvido pelo backend a partir do slug.
   const PLANOS = {
     mensal: {
       name: 'Solara Estética — Mensal',
       slug: 'solara-mensal',
       price: '497',
-      note: 'Cobrado todo mês. Cancele quando quiser, sem multa.',
-      priceId: import.meta.env.VITE_STRIPE_PRICE_MENSAL
+      note: 'Cobrado todo mês. Cancele quando quiser, sem multa.'
     },
     anual: {
       name: 'Solara Estética — Anual',
       slug: 'solara-anual',
       price: '397',
-      note: 'R$ 4.764 cobrados uma vez por ano — economia de R$ 1.200 em relação ao mensal.',
-      priceId: import.meta.env.VITE_STRIPE_PRICE_ANUAL
+      note: 'R$ 4.764 cobrados uma vez por ano — economia de R$ 1.200 em relação ao mensal.'
     }
   } as const;
   const plan = PLANOS[billing];
@@ -985,7 +984,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
               <p style={{ fontSize: '0.95rem', color: '#6B5F71', lineHeight: 1.6, margin: '16px 0 28px' }}>{plan.note}</p>
 
               <button
-                onClick={() => onNavigateToRegister(plan.name, plan.price, plan.slug, plan.priceId || '')}
+                onClick={() => onNavigateToRegister(plan.name, plan.price, plan.slug)}
                 style={{
                   width: '100%',
                   background: colors.btnSuccess,

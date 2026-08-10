@@ -69,15 +69,18 @@ class Settings:
     BACKEND_PUBLIC_URL = os.getenv("BACKEND_PUBLIC_URL", "")
     EVOLUTION_WEBHOOK_SECRET = os.getenv("EVOLUTION_WEBHOOK_SECRET", "")
 
-    # Stripe
+    # --- Stripe -----------------------------------------------------------
+    # Só dois segredos. Os IDs de preço NÃO moram aqui: vivem em
+    # plans.stripe_price_id, no banco, para que o preço cobrado e o plano
+    # mostrado no painel não possam divergir — eram quatro variáveis de plano
+    # (básico/crescimento/avançado/enterprise) do produto antigo, e sobreviver
+    # a um repivot de preço com o valor espalhado em .env é como se cobra o
+    # cliente errado.
+    #
+    # O webhook secret é POR ENDPOINT. A conta é compartilhada com outro
+    # produto; o whsec do endpoint dele não valida os eventos daqui.
     STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-    
-    # Stripe Price IDs
-    STRIPE_PRICE_BASICO = os.getenv("STRIPE_PRICE_BASICO", "")
-    STRIPE_PRICE_CRESCIMENTO = os.getenv("STRIPE_PRICE_CRESCIMENTO", "")
-    STRIPE_PRICE_AVANCADO = os.getenv("STRIPE_PRICE_AVANCADO", "")
-    STRIPE_PRICE_ENTERPRISE = os.getenv("STRIPE_PRICE_ENTERPRISE", "")
 
     # OpenAI ------------------------------------------------------------------
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
