@@ -51,3 +51,10 @@ ESTETICA-SOLARA.txt
 # Skills instaladas via "npx skills add" — dependencia, nao codigo do projeto.
 # O skills-lock.json fica versionado para permitir reinstalar.
 .agents/
+
+# Rascunho da CLI do Supabase. Sai do versionamento por dois motivos: cli-latest
+# muda sozinho a cada vez que a CLI roda (sujeira em todo diff), e
+# linked-project.json apontava para o projeto ANTIGO (mvqkelauwscxdwnzevtz) —
+# um `supabase db push` a partir daqui aplicaria migration no banco errado.
+# Quem for usar a CLI roda `supabase link` e gera o arquivo certo na sua maquina.
+supabase/.temp/
