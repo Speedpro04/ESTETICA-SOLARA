@@ -70,9 +70,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleWhatsAppClick = () => {
-    window.open('https://wa.me/5512978138934?text=Olá!%20Quero%20testar%20a%20Solara%20Estética%20por%2010%20dias%20na%20minha%20clínica.', '_blank');
-  };
+  // Todo CTA de teste leva ao cadastro, nunca a uma conversa. O produto se
+  // vende sozinho no teste de 10 dias — pôr um humano no meio do caminho troca
+  // um cadastro que acontece agora por uma mensagem que espera resposta.
+  const comecarTeste = () => onNavigateToRegister(plan.name, plan.price, plan.slug);
   // Paleta da marca vem de src/brand/tokens.ts. O alias mantém as chaves que
   // este JSX já usa (primary, cardBg, btnSuccess...), então a troca de
   // identidade não exige varrer as ~900 linhas de estilo inline.
@@ -387,7 +388,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
             
             <motion.div variants={fadeInUp} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'center', gap: isMobile ? 16 : 24, width: isMobile ? '100%' : 'auto' }}>
               <motion.button
-                onClick={handleWhatsAppClick}
+                onClick={comecarTeste}
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 style={{ backgroundColor: colors.btnSuccess, color: '#FFFFFF', border: 'none', padding: isMobile ? '18px 28px' : '20px 40px', borderRadius: 3, fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, boxShadow: `0 12px 32px ${colors.btnSuccess}40`, width: isMobile ? '100%' : 'auto' }}
@@ -1047,7 +1048,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onNavigate
               Teste 10 dias grátis, sem cartão. Converse com a sua própria Solara e veja como ela atende as suas pacientes.
             </p>
             <motion.button
-              onClick={handleWhatsAppClick}
+              onClick={comecarTeste}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               style={{ backgroundColor: colors.btnSuccess, color: '#FFFFFF', border: 'none', padding: '20px 48px', borderRadius: 3, fontSize: '1.2rem', fontWeight: '600', cursor: 'pointer', boxShadow: `0 12px 32px ${colors.btnSuccess}40` }}

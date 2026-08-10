@@ -119,6 +119,14 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Trocar de tela mantendo a rolagem deixava o formulário cortado: quem clica
+  // no CTA do rodapé — que fica no fim de uma página longa — caía no cadastro
+  // já rolado, vendo espaço em branco. Só não vale para a landing, porque
+  // voltar deve devolver a pessoa ao ponto de onde ela saiu.
+  useEffect(() => {
+    if (view !== 'landing') window.scrollTo(0, 0);
+  }, [view]);
+
   const handleDevPass = () => {
     if (!devPassEnabled) return;
     const informedCode = window.prompt('Informe o código de manutenção');
