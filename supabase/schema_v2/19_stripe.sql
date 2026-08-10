@@ -263,16 +263,19 @@ WHERE slug = 'solara-anual';
 
 
 -- 6. OS IDs DE PREÇO DO STRIPE ------------------------------------------------
--- PREENCHER ANTES DE USAR. São os `price_...` do painel do Stripe (Produtos →
--- o produto → seção Preços), não a URL do buy.stripe.com. O backend recusa o
--- checkout de plano sem este campo, e é de propósito: melhor barrar na hora do
--- que mandar a clínica para uma sessão que cobra o valor errado.
+-- Conferidos na conta em 09/08/2026, em modo LIVE:
+--   price_1U2V76... = R$   497,00 / mês  "Solara Estética/Plástica — Plano Mensal"
+--   price_1U2V9i... = R$ 4.764,00 / ano  "Solara Estética/Plástica — Plano Anual"
 --
--- Os IDs de teste e de produção são DIFERENTES. Rodar de novo trocando os
--- valores é o jeito de virar a chave de test para live.
+-- A mesma conta ainda tem ATIVO um preço de R$397/mês do produto antigo (Solara
+-- Connect, faixa "3 a 5 especialistas"). É a razão de o preço vir daqui e nunca
+-- do valor exibido na página: casar plano por "397" pegaria o preço errado, e o
+-- erro só apareceria na fatura do cliente.
 --
--- UPDATE public.plans SET stripe_price_id = 'price_XXXXXXXXXXXX'
---  WHERE slug = 'solara-mensal';
---
--- UPDATE public.plans SET stripe_price_id = 'price_YYYYYYYYYYYY'
---  WHERE slug = 'solara-anual';
+-- Os IDs de teste seriam OUTROS. Estes são de produção — trocar de ambiente é
+-- rodar estes dois UPDATE de novo com os IDs do modo test.
+UPDATE public.plans SET stripe_price_id = 'price_1U2V76FBEbXhbe7lm8bXlfYk'
+ WHERE slug = 'solara-mensal';
+
+UPDATE public.plans SET stripe_price_id = 'price_1U2V9iFBEbXhbe7lwPMp7AAX'
+ WHERE slug = 'solara-anual';
